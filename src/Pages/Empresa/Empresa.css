@@ -1,0 +1,150 @@
+.empresa-container{
+    width: 95%;
+}
+
+.a_btn{
+    text-decoration: none;
+}
+
+.section-title{
+    margin-bottom: 0rem;
+}
+
+.btn-icon{
+    display: flex;
+    justify-content: space-around;
+    margin: 0 10px;
+}
+
+.icon-button{
+    font-size: 25px;
+    margin-right: 20px;
+}
+
+.rs-btn-icon-with-text.rs-btn.rs-btn-icon-placement-left{
+    padding: 10px;
+}
+
+.tabs{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.general-data{
+    transition: .5s ease-in-out;
+}
+
+.header{
+    font-weight: 600;
+}
+
+.inf-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.4rem 0;
+}
+
+.general-info {
+    border-bottom: 1px solid #ddd;
+}
+
+.inf{
+    margin: 0 20px;
+}
+
+.rs-nav  {
+    margin-bottom: 20px !important;
+}
+
+/* =============================   INTEGRACIONES    =================================== */
+
+
+.integrations-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.integrations-container:nth-child(0){
+    margin-right: 10px;
+}
+
+
+
+/* =============================   CONTACTOS    =================================== */
+
+.header-2{
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.cards-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(345px, 1fr));
+    grid-gap: 0px;
+}
+
+.contact-card{
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    transition: .5s ease;
+    margin: 10px;
+    max-width: 400px;
+}
+
+.contact-card:hover{
+    background-color: #f1f1f1;
+}
+
+.contact-btn{
+    margin: 4px 0;
+}
+
+
+.summ-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    padding: 1rem 0;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+}
+
+.summ-content{
+    width: 60%;
+}
+
+.contact-info{
+    margin-top: 2rem;
+}
+
+.tag{
+    margin-bottom: 10px;
+}
+
+.line{
+    display: flex;
+}
+
+.contact-content{
+    margin-left: 5px;
+}
+
+.btn-bar{
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.btn-link{
+    text-decoration: none;
+}
+

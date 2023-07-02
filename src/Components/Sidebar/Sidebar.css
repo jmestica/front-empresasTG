@@ -1,0 +1,90 @@
+.container{
+    min-height: 100vh;
+    background-color: white;
+    width: 22rem;
+    border-right: 1px solid #e2e2e2;
+    padding: 2rem;
+}
+
+.logo{
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 26px;
+    color: #062F87;
+    display: flex;
+    align-items: center;
+}
+
+.logo-icon{
+    font-size: 40px;
+    margin-right: 13px;
+}
+
+.menu{
+    height: calc(100vh - 72px - 132px);
+}
+
+.section-name{
+    color: rgb(107, 107, 107);
+    margin: 1rem 0;
+}
+
+.sidebar-navlink{
+    display: flex;
+    align-items: center; 
+    margin-left: 10px;
+    text-decoration: none;
+    color: #858585;
+    transition: 0.3s ease;
+    padding: 1.3rem 0;
+}
+
+.sidebar-navlink:hover{
+    color: #062F87;
+    scale: 1.03;
+}
+
+
+.sidebar-icon{
+    font-size: 25px;
+}
+
+.sidebar-item{
+    margin-left: 10px;
+    font-size: 20px;
+}
+
+
+@media (max-width: 1100px) {
+    .container{
+        width: 12rem;
+        padding:0 1rem;
+    }
+
+    .logo{
+        font-size: 18px;
+        padding: 3rem 10px 0 10px;
+        justify-content: center;
+    }
+
+    .logo-icon{
+        font-size: 20px;
+        margin-right: 0px;
+    }
+
+    .section-name{
+        font-size: 12px;
+        margin: 30px 0 10px 0;
+    }
+
+    .sidebar-icon{
+        font-size: 16px;
+    }
+
+    .sidebar-item{
+        font-size: 15px;
+    }
+
+
+  }
+  
