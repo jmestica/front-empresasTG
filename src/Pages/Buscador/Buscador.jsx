@@ -1,5 +1,5 @@
 import "./Buscador.css";
-import { SelectPicker, Input, InputGroup, Table, Modal, Button} from "rsuite";
+import { SelectPicker, Input, InputGroup, Table, Modal} from "rsuite";
 const { Column, HeaderCell, Cell } = Table;
 import { useState } from "react";
 import SearchIcon from '@rsuite/icons/Search';
@@ -19,8 +19,8 @@ const nivel = ["Nivel 1", "Nivel 2", "Nivel 3", "Nivel 4"].map((item) => ({
   value: item,
 }));
 
-const tabla = [{nombre: "MATRA", cuit_cuil: "1329399303", nivel_kaizen: "Nivel 1", provincia: "Neuquén", sector: "Hidrocarburos"},
-{nombre: "OPS", cuit_cuil: "30716094738", nivel_kaizen: "Nivel 3", provincia: "Neuquén", sector: "Hidrocarburos"}]
+const tabla = [{nombre: "MATRA", cuit_cuil: "1329399303", nivel_kaizen: "Nivel 1", provincia: "Neuquén", sector: "Hidrocarburos"}]
+
 
 
 function Buscador() {

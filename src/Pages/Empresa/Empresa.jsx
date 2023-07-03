@@ -1,10 +1,28 @@
-import "./Empresa.css";
-import { useParams } from "react-router-dom";
-import { Tag, IconButton, Nav, Button } from "rsuite";
-import { SiMicrosoftoutlook, SiWhatsapp } from "react-icons/si";
-import { FaPeopleArrows } from "react-icons/fa";
-import { ImOnedrive } from "react-icons/im";
-import { useState } from "react";
+import React from "react"
+import "./Empresa.css"
+import { useParams } from "react-router-dom"
+import { Tag, IconButton, Nav, Button, Stack, Table, Modal, SelectPicker, Form, Input, InputGroup } from "rsuite"
+const { Column, HeaderCell, Cell } = Table
+import { SiMicrosoftoutlook, SiWhatsapp } from "react-icons/si"
+import { FaPeopleArrows } from "react-icons/fa"
+import { ImOnedrive } from "react-icons/im"
+import { useState } from "react"
+
+// ========================================== SELECT PICKER DATOS ========================================
+
+const programasSelect = ['Kaizen Tango', 'PRODEPRO AT', 'PRODEPRO ANR', 'PAC', 'PRODUCTIVIDAD 4.0'].map(
+  item => ({ label: item, value: item })
+)
+
+const estados = ['Potencial', 'En Proceso', 'Presentó', 'Aprobado', 'En curso', 'Finalizado'].map(
+  item => ({ label: item, value: item })
+)
+
+const añosSelect = ['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'].map(
+  item => ({ label: item, value: item })
+)
+
+// ========================================== SUBCOMPONENTES ========================================
 
 // eslint-disable-next-line react/prop-types
 const Navbar = ({ active, onSelect, ...props }) => {
@@ -18,12 +36,68 @@ const Navbar = ({ active, onSelect, ...props }) => {
       <Nav.Item eventKey="informacion-general">Información general</Nav.Item>
       <Nav.Item eventKey="antecedentes">Antecedentes</Nav.Item>
     </Nav>
-  );
-};
+  )
+}
+
+// eslint-disable-next-line react/display-name
+const Textarea = React.forwardRef((props, ref) => <Input {...props} as="textarea" ref={ref} />);
+
+// ############################################## MAIN ##############################################
 
 function Empresa() {
   const { id } = useParams();
   const [active, setActive] = useState("informacion-general");
+
+  // =========================== TAGS, HERRAMIENTAS Y ANTECEDENTES ==============================
+  const [herramientas, setHerramientas] = useState(['5S', 'PDCA'])
+  
+  const [programas, setProgramas] = useState(['PRODEPRO', 'Productividad 4.0', 'Kaizen Tango'])
+  
+  const [antecedentes, setAntecedentes] = useState([
+    { programa: "PRODEPRO AT", año: "2020", estado: "Finalizado" },
+    { programa: "Productividad 4.0", año: "2021", estado: "Finalizado" },
+    { programa: "Kaizen Tango", año: "2022", estado: "Finalizado" },
+    { programa: "PRODEPRO AT", año: "2023", estado: "Presentó" },
+  ])
+
+  // ===================================== MODAL DETALLE ANTECEDENTE =================================================
+
+  const [detalleAntecedentes, setDetalleAntecedente] = useState(null)
+
+  const [openDetalle, setOpenDetalle] = useState(false)
+
+  const handleOpenDetalle = (rowData) => {
+  
+    console.log(id)
+    console.log(rowData)
+
+    setDetalleAntecedente({nombre_empresa:  id, año: rowData.año, estado: rowData.estado, programa: rowData.programa});
+    
+    // const fetchDetalleAntecedente = fetch(...)
+    setOpenDetalle(true)
+  }
+  const handleCloseDetalle = () => setOpenDetalle(false);
+
+
+  const [detalleReadOnly, setDetalleReadOnly] = useState(true)
+
+
+
+
+  // ============================= MODAL AGREGAR ANTECEDENTE =====================================
+
+  const [openNuevoAntecedente, setOpenNuevoAntecedente] = useState(false)
+
+  const handleOpenNuevoAntecedente = () => setOpenNuevoAntecedente(true)
+  const handleCloseNuevoAntecedente = () => setOpenNuevoAntecedente(false);
+
+  const handleSubmitNuevoAntecedente = () => {
+    console.log('SUBMIT NUEVO ANTECEDENTE')
+  }
+
+
+  // ============================================================================================
+
 
   return (
     <div className="empresa-container">
@@ -99,45 +173,38 @@ function Empresa() {
             {/* ================================================ LINKS INTEGRACIONES ================================================= */}
 
             <div className="integrations-container">
-              <a
-                href="https://intigobar.sharepoint.com/:f:/s/-SORPAT-ATGsPatagnicos/EpF4X-oNeYdGmevnRrfVpRcBp7Lc4lqUuNaOkMO4frtyTA"
-                className="a_btn"
-                target="_blank"
-                rel="noreferrer"
-              >
+
                 <IconButton
                   className="btn-icon"
                   icon={<ImOnedrive className="icon-button" />}
                   color="blue"
                   appearance="primary"
+                  href="https://intigobar.sharepoint.com/:f:/s/-SORPAT-ATGsPatagnicos/EpF4X-oNeYdGmevnRrfVpRcBp7Lc4lqUuNaOkMO4frtyTA"
+                  target="_blank"
+                  noreferrer
                 >
                   Carpeta ATGs Patagónicos
                 </IconButton>
-              </a>
-
-              <a
-                target="_blank"
-                rel="noreferrer"
-                className="a_btn"
-                href="https://crm.inti.gob.ar/index.php?module=Accounts&offset=1&stamp=1688171761027743400&return_module=Accounts&action=DetailView&record=c604163c-0c14-d21b-b6c7-61c223215a42"
-              >
+             
                 <IconButton
                   className="btn-icon"
                   icon={<FaPeopleArrows className="icon-button" />}
                   color="red"
                   appearance="primary"
-                >
+                  href="https://crm.inti.gob.ar/index.php?module=Accounts&offset=1&stamp=1688171761027743400&return_module=Accounts&action=DetailView&record=c604163c-0c14-d21b-b6c7-61c223215a42"
+                  target="_blank"
+                  rel="noreferrer">
                   Historial CRM
                 </IconButton>
-              </a>
-            </div>
+              </div>
           </div>
 
           {/* ================================================ CARDS DE CONTACTO ================================================= */}
+
           <div className="contact-info">
             <p className="header-2">INFORMACIÓN DE CONTACTO</p>
 
-            <div className="cards-container">
+            <Stack wrap spacing={6}>
               <div className="contact-card">
                 <Tag color="blue" className="tag">
                   Contacto 1
@@ -181,7 +248,7 @@ function Empresa() {
               </div>
               <div className="contact-card">
                 <Tag color="blue" className="tag">
-                  Contacto 1
+                  Contacto 2
                 </Tag>
 
                 <div className="line">
@@ -222,7 +289,7 @@ function Empresa() {
               </div>
               <div className="contact-card">
                 <Tag color="blue" className="tag">
-                  Contacto 1
+                  Contacto 3
                 </Tag>
 
                 <div className="line">
@@ -261,32 +328,174 @@ function Empresa() {
                   </Button>
                 </div>
               </div>
-            </div>
+            </Stack>
           </div>
         </div>
       )}
 
+      {/* ================================================ PESTAÑA DE ANTECEDENTES ================================================= */}
+
       {active === "antecedentes" && (
         <div className="antecedentes">
-          <p className="header">HERRAMIENTAS</p>
+    
+          {/* ========================  HERRAMIENTAS  ============================= */}
+          <p className="header-2">HERRAMIENTAS</p>
+          <div className="tags-container">
+            {herramientas.map((item)=> <Tag key={item} color="blue">{item}</Tag> )}
+          </div>
 
-          <p className="header">CARPETA DE ANTECEDENTES</p>
+        {/* ========================  PROGRAMAS  ============================= */}
+          <p className="header-2">PROGRAMAS</p>
 
-          <a
-            target="_blank"
-            rel="noreferrer"
-            href="https://intigobar.sharepoint.com/:f:/s/-SORPAT-ATGsPatagnicos/EpF4X-oNeYdGmevnRrfVpRcBp7Lc4lqUuNaOkMO4frtyTA?e=h7DR0c"
-            className="btn-link"
+          <div className="tags-container">
+            {programas.map((item) => <Tag key={item} color="red">{item}</Tag>)}
+          </div>
+
+          <br />
+        {/* ========================  TABLA  ============================= */}
+          <Table
+            autoHeight
+            data={antecedentes}
+            onRowClick={(rowData) => {
+              handleOpenDetalle(rowData);
+            }}
           >
-            <IconButton
-              className="btn-icon"
-              icon={<ImOnedrive className="icon-button" />}
-              color="blue"
-              appearance="primary"
-            >
-              Carpeta ATGs Patagónicos
-            </IconButton>
-          </a>
+            <Column flexGrow={1} align="center" fixed>
+              <HeaderCell>Programa</HeaderCell>
+              <Cell dataKey="programa" />
+            </Column>
+
+            <Column width={60} align="center" fixed>
+              <HeaderCell>Año</HeaderCell>
+              <Cell dataKey="año" />
+            </Column>
+
+            <Column flexGrow={1} align="center" fixed>
+              <HeaderCell>Estado</HeaderCell>
+              <Cell dataKey="estado" />
+            </Column>
+
+          </Table>
+          <br/>
+          
+          <Button block appearance="primary" color="blue" onClick={handleOpenNuevoAntecedente} >Agregar</Button>
+
+          {/* ========================  MODAL AGREGAR ANTECEDENTE  ============================= */}
+
+          <Modal open={openNuevoAntecedente} onClose={handleCloseNuevoAntecedente}>
+            <Modal.Header>
+              <Modal.Title className="header-2">AGREGAR ANTECEDENTE</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form fluid onSubmit={handleSubmitNuevoAntecedente}>
+                  <Form.Group controlId="resumen">
+                    <Form.ControlLabel>RESUMEN</Form.ControlLabel>
+                    <Form.Control rows={5} name="textarea" accepter={Textarea} required />
+                    <Form.HelpText>Breve descripción del contacto con la empresa</Form.HelpText>
+                  </Form.Group>
+
+                  <Form.Group controlId="programa">
+                    <Form.ControlLabel>PROGRAMA</Form.ControlLabel>
+                    <SelectPicker required data={programasSelect} searchable={false} placeholder="Seleccione un programa" block />
+                  </Form.Group>
+
+                  <Form.Group controlId="año">
+                    <Form.ControlLabel>AÑO</Form.ControlLabel>
+                    <SelectPicker required data={añosSelect} searchable={false} placeholder="Seleccione el año" block />
+                  </Form.Group>
+
+                  <Form.Group controlId="estado">
+                    <Form.ControlLabel>ESTADO</Form.ControlLabel>
+                    <SelectPicker required data={estados} searchable={false} placeholder="Seleccione el estado" block />
+                  </Form.Group>
+              
+                  <Form.Group controlId="link">
+                    <Form.ControlLabel>LINK CARPETA</Form.ControlLabel>
+                    <Form.Control name="link" type="link" required/>
+                    <Form.HelpText>Para obtener el link, desde la carpeta de ATGs seleccione "Copiar Vínculo" {">"} Click en: "Los usuarios de Instituto ..." {">"} Personas que tienen acceso {">"} Aplicar {">"} Copiar </Form.HelpText>
+                  </Form.Group>
+
+                  <Button onClick={handleSubmitNuevoAntecedente} appearance="primary" type="submit">
+                      Guardar
+                  </Button>
+                  <Button onClick={handleCloseNuevoAntecedente} appearance="subtle">
+                      Cancelar
+                  </Button>
+               
+
+              </Form>
+
+            </Modal.Body>
+
+          </Modal>
+
+          {/* ========================  MODAL DETALLE  ============================= */}
+
+          <Modal open={openDetalle} onClose={handleCloseDetalle}>
+            <Modal.Header>
+              <Modal.Title className="header-2">DETALLE ANTECEDENTE</Modal.Title>
+            </Modal.Header>
+
+            
+            <Modal.Body>
+            <Form fluid>
+               <Form.Group controlId="resumen">
+                    <Form.ControlLabel>RESUMEN</Form.ControlLabel>
+                    <Form.Control rows={4} name="textarea"  readOnly accepter={Textarea} required value="Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima vero, reprehenderit temporibus libero harum, soluta ullam rerum architecto, fugit sapiente quas qui cumque voluptate optio tempora quo iusto in facere?"/>
+                </Form.Group>
+
+                <Form.Group controlId="programa">
+                    <Form.ControlLabel>PROGRAMA</Form.ControlLabel>
+                    <Form.Control name="programa" readOnly value={detalleAntecedentes && detalleAntecedentes.programa ? detalleAntecedentes.programa : 'Sin programa disponible'}/>
+                </Form.Group>
+
+                <Form.Group controlId="año">
+                    <Form.ControlLabel>AÑO</Form.ControlLabel>
+                    <Form.Control readOnly value={detalleAntecedentes && detalleAntecedentes.año ? detalleAntecedentes.año : 'Sin año disponible'}/>
+                </Form.Group>
+
+                <Form.Group controlId="estado">
+                    <Form.ControlLabel>ESTADO</Form.ControlLabel> 
+                    {detalleAntecedentes && <SelectPicker block readOnly={detalleAntecedentes && detalleAntecedentes.estado === 'Finalizado'? true : false} data={estados} searchable={false} defaultValue={detalleAntecedentes &&detalleAntecedentes.estado} placeholder={detalleAntecedentes.estado} disabledItemValues={[detalleAntecedentes.estado]}/>} 
+                </Form.Group>
+
+                <Form.Group controlId="link_carpeta_antecedente">
+                    <Form.ControlLabel>CARPETA DOCUMENTACIÓN</Form.ControlLabel>
+
+                    <Button
+                    className="contact-btn"
+                    color="blue"
+                    appearance="primary"
+                    endIcon={<ImOnedrive/>}
+                    href="https://intigobar.sharepoint.com/:f:/r/sites/-SORPAT-ATGsPatagnicos/Documentos%20compartidos/ATGs%20Patag%C3%B3nicos/01.%20Empresas,%20Org,%20Coope/C-MATRA/2020-PRODEPRO?csf=1&web=1&e=vSLRGq"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Carpeta de Documentación
+                  </Button>
+                </Form.Group>
+
+              <Button onClick={handleCloseDetalle} appearance="primary" block>
+                Aceptar
+              </Button>
+              <Button appearance="primary" color="orange" block>
+                Editar
+              </Button>
+              <Button onClick={handleCloseDetalle} appearance="primary" block color="red">
+                Cancelar
+              </Button>
+
+                
+            </Form>
+            
+          </Modal.Body>
+
+
+          
+          
+          </Modal>
+
+
         </div>
       )}
     </div>

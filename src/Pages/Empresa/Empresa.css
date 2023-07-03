@@ -80,7 +80,7 @@
 .header-2{
     text-align: center;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin: 10px 0;
 }
 
 .cards-container{
@@ -146,5 +146,23 @@
 
 .btn-link{
     text-decoration: none;
+}
+
+
+/* =============================   ANTECEDENTES    =================================== */
+
+.antecedentes{
+    position: relative;
+}
+
+.tags-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.rs-modal-content{
+    transform: translate(10rem, 4rem);
+
 }
 
