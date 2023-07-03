@@ -1,5 +1,6 @@
 .buscador-container{
     width: 100%;
+    min-height: calc(100vh - 2rem - 33px);
 }
 
 .section-title {
@@ -22,10 +23,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .filter{
-    margin: 0 10px;
+    margin: 10px;
 }
 
 .searchbar-container{
