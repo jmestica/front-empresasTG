@@ -118,7 +118,7 @@ const handleCiudadSelect = (value) => {
               {/* Tamaño SePyme */}
               <Form.Group controlId="tamaño_sepyme">
                 <Form.ControlLabel>Tamaño SePYME</Form.ControlLabel>
-                <SelectPicker id="tamaño_sepyme" data={tamaños_select} block placeholder="Seleccione un tamaño" searchable={false} defaultValue={formData.tamaño_sepyme} onSelect={(value)=>{setFormData({...formData, tamaño_sepyme: value})}} onClean={()=> setFormData({...formData, tamaño_sepyme: ''})}/>
+                <SelectPicker name="tamaño_sepyme" id="tamaño_sepyme" data={tamaños_select} block placeholder="Seleccione un tamaño" searchable={false} defaultValue={formData.tamaño_sepyme} onSelect={(value)=>{setFormData({...formData, tamaño_sepyme: value})}} onClean={()=> setFormData({...formData, tamaño_sepyme: ''})}/>
               </Form.Group>
               {/* Razón Social */}
               <Form.Group controlId="razon_social">
@@ -133,17 +133,17 @@ const handleCiudadSelect = (value) => {
               {/* Descripción */}
               <Form.Group controlId="descripcion">
                 <Form.ControlLabel>Descripción</Form.ControlLabel>
-                <Form.Control rows={3} name="descripcion" accepter={Textarea} />
+                <Form.Control rows={3} name="descripcion" accepter={Textarea}  defaultValue={formData.descripcion} onChange={(e,e2)=> (setFormData({...formData, descripcion: e2.target.value}))}/>
               </Form.Group>
               {/* Link web */}
               <Form.Group controlId="link_web">
                 <Form.ControlLabel>Link Web</Form.ControlLabel>
-                <Form.Control name="link_web" />
+                <Form.Control name="link_web" defaultValue={formData.link_web} onChange={(e,e2)=>(setFormData({...formData, link_web: e2.target.value}))}/>
               </Form.Group>
               {/* Link CRM */}
               <Form.Group controlId="link_CRM">
                 <Form.ControlLabel>Link CRM</Form.ControlLabel>
-                <Form.Control name="link_CRM" />
+                <Form.Control name="link_CRM"  defaultValue={formData.link_crm} onChange={(e,e2)=>(setFormData({...formData, link_crm: e2.target.value}))}/>
               </Form.Group>
             </Form>
           ) : null}
@@ -183,10 +183,10 @@ const handleCiudadSelect = (value) => {
             disabled={step === 0}
             appearance="primary"
           >
-            Previous
+            Anterior
           </Button>
           <Button onClick={onNext} disabled={step === 4} appearance="primary">
-            Next
+            Siguiente
           </Button>
         </ButtonGroup>
       </div>
