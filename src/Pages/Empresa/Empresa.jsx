@@ -6,7 +6,7 @@ const { Column, HeaderCell, Cell } = Table
 import { SiMicrosoftoutlook, SiWhatsapp } from "react-icons/si"
 import { FaPeopleArrows } from "react-icons/fa"
 import { ImOnedrive } from "react-icons/im"
-import { useState } from "react"
+import { useState, useRef } from "react"
 
 // ========================================== SELECT PICKER DATOS ========================================
 
@@ -48,7 +48,7 @@ function Empresa() {
   const { id } = useParams();
   const [active, setActive] = useState("informacion-general");
 
-  // =========================== TAGS, HERRAMIENTAS Y ANTECEDENTES ==============================
+  // =========================== TAGS, HERRAMIENTAS, CONTACTOS Y ANTECEDENTES ==============================
   const [herramientas, setHerramientas] = useState(['5S', 'PDCA'])
   
   const [programas, setProgramas] = useState(['PRODEPRO', 'Productividad 4.0', 'Kaizen Tango'])
@@ -59,6 +59,8 @@ function Empresa() {
     { programa: "Kaizen Tango", año: "2022", estado: "Finalizado" },
     { programa: "PRODEPRO AT", año: "2023", estado: "Presentó" },
   ])
+
+  const [contactos, setContactos] = useState([{nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}, {nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}, {nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}])
 
   // ===================================== MODAL DETALLE ANTECEDENTE =================================================
 
@@ -205,6 +207,10 @@ function Empresa() {
             <p className="header-2">INFORMACIÓN DE CONTACTO</p>
 
             <Stack wrap spacing={6}>
+
+
+
+
               <div className="contact-card">
                 <Tag color="blue" className="tag">
                   Contacto 1
@@ -246,6 +252,9 @@ function Empresa() {
                   </Button>
                 </div>
               </div>
+
+
+
               <div className="contact-card">
                 <Tag color="blue" className="tag">
                   Contacto 2

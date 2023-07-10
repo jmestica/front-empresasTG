@@ -1,7 +1,7 @@
 import "./Buscador.css";
 import { SelectPicker, Input, InputGroup, Table, Drawer, Button } from "rsuite";
 const { Column, HeaderCell, Cell } = Table;
-import { useState } from "react";
+import { useState, useRef } from "react";
 import SearchIcon from "@rsuite/icons/Search";
 import { useNavigate } from "react-router-dom";
 
@@ -287,7 +287,7 @@ function Buscador() {
           <Drawer.Actions>
             <Button onClick={() => setOpenWithHeader(false)}>Cancelar</Button>
             <Button
-              onClick={() => setOpenWithHeader(false)}
+              onClick={()=>{console.log('first')}}
               appearance="primary"
             >
               Copiar lista de mails
