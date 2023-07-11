@@ -10,8 +10,7 @@ import {
   InputGroup,
   Table,
   Modal,
-  TagGroup,
-  Tag,
+  TagPicker,
 } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
@@ -150,12 +149,15 @@ function Agregar() {
   };
 
   const handleSubmitAgregarAntecedente = (e, e2) => {
+
+    const herramientas = e2.target.herramientas.defaultValue.split(',');
+
     const nuevo_antecedente = {
       resumen: e2.target.resumen.value,
       motivo: e2.target.programa.defaultValue,
       año: e2.target.año.defaultValue,
       estado: e2.target.estado.defaultValue,
-      herramientas: tags,
+      herramientas: herramientas,
     };
 
     setFormData({
@@ -165,19 +167,6 @@ function Agregar() {
 
     handleCloseAdd();
   };
-
-  const handleSelectHerramienta = (value) => {
-    if (!tags.includes(value)) {
-      setTags([...tags, value]);
-    }
-  };
-
-  const removeTag = (tag) => {
-    const nextTags = tags.filter((item) => item !== tag);
-
-    setTags(nextTags);
-  };
-
 
   const borrarAntecedente = (rowData) => { 
 
@@ -194,12 +183,12 @@ function Agregar() {
     
   }
 
-  
+
   const editarAntecedente = (rowData) => { 
 
     console.log(rowData)
 
-}
+  }
 
 
   const handleOpenAdd = () => {
@@ -410,7 +399,8 @@ function Agregar() {
               <Table
                 virtualized
                 data={formData.antecedentes}
-                // onRowClick=(row)}
+                height={300}
+            
               >
                 <Column flexGrow={1} align="center" fixed>
                   <HeaderCell>Programa/Motivo</HeaderCell>
@@ -520,28 +510,8 @@ function Agregar() {
                     <Form.Group controlId="herramientas">
                       <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
 
-                      <TagGroup>
-                        {tags.map((tag) => (
-                          <Tag
-                            closable
-                            color="red"
-                            key={tag}
-                            onClose={() => removeTag(tag)}
-                          >
-                            {tag}
-                          </Tag>
-                        ))}
-                      </TagGroup>
-                      <br />
-                      <SelectPicker
-                        required
-                        data={herramientas}
-                        searchable={true}
-                        placement="auto"
-                        placeholder="Seleccione la heramienta"
-                        onSelect={(value) => handleSelectHerramienta(value)}
-                        block
-                      />
+                      <TagPicker id="herramientas" data={test_herramientas} block placeholder="Seleccione las herramientas" tagProps={{color: 'red'}} />
+
                     </Form.Group>
 
                     <Button appearance="primary" type="submit">
