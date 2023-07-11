@@ -6,7 +6,7 @@ const { Column, HeaderCell, Cell } = Table
 import { SiMicrosoftoutlook, SiWhatsapp } from "react-icons/si"
 import { FaPeopleArrows } from "react-icons/fa"
 import { ImOnedrive } from "react-icons/im"
-import { useState, useRef } from "react"
+import { useState } from "react"
 
 // ========================================== SELECT PICKER DATOS ========================================
 
@@ -54,10 +54,10 @@ function Empresa() {
   const [programas, setProgramas] = useState(['PRODEPRO', 'Productividad 4.0', 'Kaizen Tango'])
   
   const [antecedentes, setAntecedentes] = useState([
-    { programa: "PRODEPRO AT", año: "2020", estado: "Finalizado" },
-    { programa: "Productividad 4.0", año: "2021", estado: "Finalizado" },
-    { programa: "Kaizen Tango", año: "2022", estado: "Finalizado" },
-    { programa: "PRODEPRO AT", año: "2023", estado: "Presentó" },
+    { motivo: "PRODEPRO AT", año: "2020", estado: "Finalizado" },
+    { motivo: "Productividad 4.0", año: "2021", estado: "Finalizado" },
+    { motivo: "Kaizen Tango", año: "2022", estado: "Finalizado" },
+    { motivo: "PRODEPRO AT", año: "2023", estado: "Presentó" },
   ])
 
   const [contactos, setContactos] = useState([{nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}, {nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}, {nombre:'Administración', whatsapp: "+54 299 6337902", mail: "administracion@matrasrl.com.ar"}])
@@ -142,15 +142,13 @@ function Empresa() {
               <div className="inf">
                 <p className="header">PÁGINA WEB</p>
                 <p className="inf-content">
-                  {" "}
                   <a
                     href="https://www.matrasrl.com.ar/"
                     target="_blank"
                     rel="noreferrer "
                   >
-                    {" "}
                     https://www.matrasrl.com.ar/
-                  </a>{" "}
+                  </a>
                 </p>
               </div>
             </div>
@@ -175,18 +173,6 @@ function Empresa() {
             {/* ================================================ LINKS INTEGRACIONES ================================================= */}
 
             <div className="integrations-container">
-
-                <IconButton
-                  className="btn-icon"
-                  icon={<ImOnedrive className="icon-button" />}
-                  color="blue"
-                  appearance="primary"
-                  href="https://intigobar.sharepoint.com/:f:/s/-SORPAT-ATGsPatagnicos/EpF4X-oNeYdGmevnRrfVpRcBp7Lc4lqUuNaOkMO4frtyTA"
-                  target="_blank"
-                  noreferrer
-                >
-                  Carpeta ATGs Patagónicos
-                </IconButton>
              
                 <IconButton
                   className="btn-icon"
@@ -371,7 +357,7 @@ function Empresa() {
           >
             <Column flexGrow={1} align="center" fixed>
               <HeaderCell>Programa</HeaderCell>
-              <Cell dataKey="programa" />
+              <Cell dataKey="motivo" />
             </Column>
 
             <Column width={60} align="center" fixed>
@@ -418,11 +404,6 @@ function Empresa() {
                     <SelectPicker required data={estados} searchable={false} placeholder="Seleccione el estado" block />
                   </Form.Group>
               
-                  <Form.Group controlId="link">
-                    <Form.ControlLabel>LINK CARPETA</Form.ControlLabel>
-                    <Form.Control name="link" type="link" required/>
-                    <Form.HelpText>Para obtener el link, desde la carpeta de ATGs seleccione "Copiar Vínculo" {">"} Click en: "Los usuarios de Instituto ..." {">"} Personas que tienen acceso {">"} Aplicar {">"} Copiar </Form.HelpText>
-                  </Form.Group>
 
                   <Button onClick={handleSubmitNuevoAntecedente} appearance="primary" type="submit">
                       Guardar
@@ -468,21 +449,6 @@ function Empresa() {
                     {detalleAntecedentes && <SelectPicker block readOnly={detalleAntecedentes && detalleAntecedentes.estado === 'Finalizado'? true : false} data={estados} searchable={false} defaultValue={detalleAntecedentes &&detalleAntecedentes.estado} placeholder={detalleAntecedentes.estado} disabledItemValues={[detalleAntecedentes.estado]}/>} 
                 </Form.Group>
 
-                <Form.Group controlId="link_carpeta_antecedente">
-                    <Form.ControlLabel>CARPETA DOCUMENTACIÓN</Form.ControlLabel>
-
-                    <Button
-                    className="contact-btn"
-                    color="blue"
-                    appearance="primary"
-                    endIcon={<ImOnedrive/>}
-                    href="https://intigobar.sharepoint.com/:f:/r/sites/-SORPAT-ATGsPatagnicos/Documentos%20compartidos/ATGs%20Patag%C3%B3nicos/01.%20Empresas,%20Org,%20Coope/C-MATRA/2020-PRODEPRO?csf=1&web=1&e=vSLRGq"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Carpeta de Documentación
-                  </Button>
-                </Form.Group>
 
               <Button onClick={handleCloseDetalle} appearance="primary" block>
                 Aceptar

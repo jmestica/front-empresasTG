@@ -22,12 +22,6 @@ function Sidebar() {
           <p className='sidebar-item'>buscador</p>
         </NavLink>
 
-
-        <NavLink to="editor" className="sidebar-navlink">
-          <LuEdit2 className='sidebar-icon'/>
-          <p className='sidebar-item'>editar datos</p>
-        </NavLink>
-
         <NavLink to="add" className="sidebar-navlink">
           <IoPersonAddOutline className='sidebar-icon'/>
           <p className='sidebar-item'>agregar empresa</p>
