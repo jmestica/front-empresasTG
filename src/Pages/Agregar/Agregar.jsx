@@ -11,6 +11,7 @@ import {
   Table,
   Modal,
   TagPicker,
+  AutoComplete,
 } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
@@ -53,22 +54,18 @@ const estados = [
   "Finalizado",
 ].map((item) => ({ label: item, value: item }));
 
-const añosSelect = [
-  "2017",
-  "2018",
-  "2019",
-  "2020",
-  "2021",
-  "2022",
-  "2023",
-  "2024",
-].map((item) => ({ label: item, value: item }));
+const añosSelect = ["2023", "2022", "2021", "2020", "2019"];
 
 function Agregar() {
   //================================== STATES ===================================
 
   //Formulario de pasos
   const [step, setStep] = useState(0);
+  const [statusStep1, setStatusStep1] = useState("process");
+  const [statusStep2, setStatusStep2] = useState("process");
+  const [statusStep3, setStatusStep3] = useState("process");
+  const [statusStep4, setStatusStep4] = useState("process");
+  const [statusStep5, setStatusStep5] = useState("process");
 
   //Datos del formulario
   const [formData, setFormData] = useState({
@@ -107,19 +104,32 @@ function Agregar() {
     "TPM",
   ].map((item) => ({ label: item, value: item }));
 
-
   //traer de api
   const [herramientas, setHerramientas] = useState(test_herramientas);
 
   const [tags, setTags] = useState([]);
-
 
   //====================== STEPS HANDLER =============================
 
   const onChange = (nextStep) => {
     setStep(nextStep < 0 ? 0 : nextStep > 4 ? 4 : nextStep);
 
-    console.log(formData);
+
+
+
+    if (nextStep === 1) {
+
+      setStat
+
+      if (
+        !formData.cuit2 ||
+        !formData.cuit3 ||
+        !formData.domicilio ||
+        !formData.descripcion
+      ) {
+        setStatusStep1("error")
+      }
+    } 
   };
 
   const onNext = () => onChange(step + 1);
@@ -149,8 +159,7 @@ function Agregar() {
   };
 
   const handleSubmitAgregarAntecedente = (e, e2) => {
-
-    const herramientas = e2.target.herramientas.defaultValue.split(',');
+    const herramientas = e2.target.herramientas.defaultValue.split(",");
 
     const nuevo_antecedente = {
       resumen: e2.target.resumen.value,
@@ -168,37 +177,32 @@ function Agregar() {
     handleCloseAdd();
   };
 
-  const borrarAntecedente = (rowData) => { 
+  const borrarAntecedente = (rowData) => {
+    const actual = formData.antecedentes;
 
-      const actual = formData.antecedentes
+    const antecedentesUpdate = actual.filter((item) => {
+      return (
+        item.motivo !== rowData.motivo ||
+        item.año !== rowData.año ||
+        item.estado !== rowData.estado
+      );
+    });
 
-      const antecedentesUpdate = actual.filter((item) => {
+    setFormData({ ...formData, antecedentes: antecedentesUpdate });
+  };
 
-        return item.motivo !== rowData.motivo ||
-               item.año !== rowData.año ||
-               item.estado !== rowData.estado;
-      });
-
-      setFormData({...formData, antecedentes: antecedentesUpdate})      
-    
-  }
-
-
-  const editarAntecedente = (rowData) => { 
-
-    console.log(rowData)
-
-  }
-
+  const editarAntecedente = (rowData) => {
+    console.log(rowData);
+  };
 
   const handleOpenAdd = () => {
-    setOpen(true)
-    setTags([])
-  }
+    setOpen(true);
+    setTags([]);
+  };
 
   const handleCloseAdd = () => {
-    setOpen(false)
-    setTags([])
+    setOpen(false);
+    setTags([]);
   };
 
   // ============================================================================
@@ -209,7 +213,7 @@ function Agregar() {
 
       <div className="step-container">
         <Steps current={step}>
-          <Steps.Item title="Datos Generales" />
+          <Steps.Item title="Datos Generales" status={statusStep1} />
           <Steps.Item title="Localización" />
           <Steps.Item title="Antecedentes" />
           <Steps.Item title="Cadena de Valor" />
@@ -396,15 +400,10 @@ function Agregar() {
 
           {step === 2 ? (
             <>
-              <Table
-                virtualized
-                data={formData.antecedentes}
-                height={300}
-            
-              >
+              <Table virtualized data={formData.antecedentes} height={300}>
                 <Column flexGrow={1} align="center" fixed>
                   <HeaderCell>Programa/Motivo</HeaderCell>
-                  <Cell dataKey="motivo"/>
+                  <Cell dataKey="motivo" />
                 </Column>
 
                 <Column width={80} align="center">
@@ -417,28 +416,33 @@ function Agregar() {
                   <Cell dataKey="estado" />
                 </Column>
 
-                
                 <Column width={80} align="center">
                   <HeaderCell></HeaderCell>
-                  <Cell style={{padding: '6px'}}>
-                  {rowData => (
-                    <Button appearance="primary" color="blue" onClick={() => editarAntecedente(rowData)}>
-                      Editar
-                    </Button>
-                  )}
-                  
+                  <Cell style={{ padding: "6px" }}>
+                    {(rowData) => (
+                      <Button
+                        appearance="primary"
+                        color="blue"
+                        onClick={() => editarAntecedente(rowData)}
+                      >
+                        Editar
+                      </Button>
+                    )}
                   </Cell>
                 </Column>
 
                 <Column width={80} align="center">
                   <HeaderCell></HeaderCell>
-                  <Cell style={{padding: '6px'}}>
-                  {rowData => (
-                    <Button appearance="primary" color="red" onClick={() => borrarAntecedente(rowData)}>
-                      Borrar
-                    </Button>
-                  )}
-                  
+                  <Cell style={{ padding: "6px" }}>
+                    {(rowData) => (
+                      <Button
+                        appearance="primary"
+                        color="red"
+                        onClick={() => borrarAntecedente(rowData)}
+                      >
+                        Borrar
+                      </Button>
+                    )}
                   </Cell>
                 </Column>
               </Table>
@@ -482,14 +486,11 @@ function Agregar() {
 
                     {/* AÑO */}
                     <Form.Group controlId="año">
-                      <Form.ControlLabel>AÑO</Form.ControlLabel>
-                      <SelectPicker
-                        required
-                        data={añosSelect}
-                        searchable={false}
-                        placeholder="Seleccione el año"
+                      <Form.ControlLabel>AÑO *</Form.ControlLabel>
+                      <AutoComplete
                         block
-                        id="año"
+                        data={añosSelect}
+                        placeholder="Seleccione un año"
                       />
                     </Form.Group>
 
@@ -509,9 +510,13 @@ function Agregar() {
                     {/* HERRAMIENTAS */}
                     <Form.Group controlId="herramientas">
                       <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
-
-                      <TagPicker id="herramientas" data={test_herramientas} block placeholder="Seleccione las herramientas" tagProps={{color: 'red'}} />
-
+                      <TagPicker
+                        id="herramientas"
+                        data={test_herramientas}
+                        block
+                        placeholder="Seleccione las herramientas"
+                        tagProps={{ color: "red" }}
+                      />
                     </Form.Group>
 
                     <Button appearance="primary" type="submit">
@@ -530,6 +535,8 @@ function Agregar() {
               </Modal>
             </>
           ) : null}
+
+          {/* ============================= CADENA DE VALOR =============================== */}
         </Panel>
         <br />
         <ButtonGroup>
