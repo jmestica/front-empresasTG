@@ -12,6 +12,8 @@ import {
   Modal,
   TagPicker,
   AutoComplete,
+  Notification,
+  useToaster,
 } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
@@ -52,9 +54,15 @@ const estados = [
   "Aprobado",
   "En curso",
   "Finalizado",
+  "No avanzó"
 ].map((item) => ({ label: item, value: item }));
 
 const añosSelect = ["2023", "2022", "2021", "2020", "2019"];
+
+//============================================================================
+
+
+
 
 function Agregar() {
   //================================== STATES ===================================
@@ -84,13 +92,17 @@ function Agregar() {
     antecedentes: [],
   });
 
-  //Modal
-  const [open, setOpen] = useState(false);
+  //Modal y notificación
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [type, setType] = useState('');
+  const [header, setHeader] = useState('')
+  const [message, setMessage] = useState('');
+  const toaster = useToaster();
 
   //Datos de localización
   const [ciudades, setCiudades] = useState([]);
   const [parques, setParques] = useState([]);
-
   const [ciudadesDisabled, setCiudadesDisabled] = useState(true);
   const [parquesDisabled, setParquesDisabled] = useState(true);
 
@@ -104,32 +116,86 @@ function Agregar() {
     "TPM",
   ].map((item) => ({ label: item, value: item }));
 
+
+  const datos_asesores = [
+    "Alonso Diana",
+    "Alvez Pricila",
+    "Bribarelli María Virginia",
+    "Lizzadro Carolina",
+    "Maidana Ain",
+    "Mazzitelli Nicolás Pedro",
+    "Mestica Juan Martin",
+    "Plache Agustín Nicolas",
+    "Rico Abel Adolfo"
+  ].map((item) => ({ label: item, value: item }));
+
+  
+
   //traer de api
   const [herramientas, setHerramientas] = useState(test_herramientas);
 
   const [tags, setTags] = useState([]);
 
+  const [antecedenteEditable, setAntecedenteEditable] = useState({});
+
+  // ============================ NOTIFICACIÓN =======================
+
+  const notificacion = (
+    <Notification type={type} header={header} style={{marginLeft: '320px'}} closable>
+      <p>{message}</p>
+    </Notification>
+  );
+  
   //====================== STEPS HANDLER =============================
 
   const onChange = (nextStep) => {
     setStep(nextStep < 0 ? 0 : nextStep > 4 ? 4 : nextStep);
 
-
-
-
-    if (nextStep === 1) {
-
-      setStat
-
+    //Advertencias del primer formulario
+    if (nextStep === 0) {
+      setStatusStep1("process");
+    } 
+    
+    //Advertencias de error primer formulario
+    else if (nextStep === 1) {
+      setStatusStep2("process");
       if (
         !formData.cuit2 ||
         !formData.cuit3 ||
         !formData.domicilio ||
         !formData.descripcion
       ) {
-        setStatusStep1("error")
+        setStatusStep1("error");
+      } else {
+        setStatusStep1("finish");
       }
     } 
+    
+    //Advertencias de segundo formulario
+    else if (nextStep === 2) {
+      setStatusStep3("process")
+
+      if(
+        !formData.provincia ||
+        !formData.ciudad ||
+        !formData.parque_industrial
+      ) {
+        setStatusStep2("error");
+      } else {
+        setStatusStep2("finish");
+      }
+    }
+
+    //Como una empresa puede ser cargada sin antecedentes, no se marca errores en el paso 3
+    else if (nextStep === 3) {
+      setStatusStep3("finish")
+    }
+
+    // else if (nextStep === 4) {
+
+    // }
+
+
   };
 
   const onNext = () => onChange(step + 1);
@@ -159,7 +225,10 @@ function Agregar() {
   };
 
   const handleSubmitAgregarAntecedente = (e, e2) => {
-    const herramientas = e2.target.herramientas.defaultValue.split(",");
+
+    //Generación de objetos
+    const herramientas = e2.target.herramientas.defaultValue.split(",")
+    const asesores = e2.target.asesores.defaultValue.split(",")
 
     const nuevo_antecedente = {
       resumen: e2.target.resumen.value,
@@ -167,14 +236,29 @@ function Agregar() {
       año: e2.target.año.defaultValue,
       estado: e2.target.estado.defaultValue,
       herramientas: herramientas,
+      ciudad: e2.target.ciudad.defaultValue,
+      asesores: asesores,
+
     };
 
-    setFormData({
-      ...formData,
-      antecedentes: [...formData.antecedentes, nuevo_antecedente],
-    });
+    //Validación de campos obligatorios
+    if(nuevo_antecedente.resumen && nuevo_antecedente.motivo && nuevo_antecedente.año && nuevo_antecedente.estado){
+    
 
-    handleCloseAdd();
+      setFormData({
+        ...formData,
+        antecedentes: [...formData.antecedentes, nuevo_antecedente],
+      });
+
+      handleCloseAdd();
+  
+    } else {
+        setMessage('Hay campos obligatorios incompletos')
+        setType('error')
+        setHeader('Campos obligatorios')
+        toaster.push(notificacion)
+    }
+  
   };
 
   const borrarAntecedente = (rowData) => {
@@ -192,20 +276,40 @@ function Agregar() {
   };
 
   const editarAntecedente = (rowData) => {
-    console.log(rowData);
+
+    setAntecedenteEditable({
+      resumen: rowData.resumen,
+      motivo: rowData.motivo,
+      año: rowData.año,
+      estado: rowData.estado,
+      herramientas: rowData.herramientas,
+      ciudad: rowData.ciudad,
+      asesores: rowData.asesores,
+    })
+
+    handleOpenEdit()
+
   };
 
+  const handleOpenEdit = () => {
+    setOpenEdit(true)
+  }
+
   const handleOpenAdd = () => {
-    setOpen(true);
-    setTags([]);
+    setOpenAdd(true)
+    setTags([])
   };
 
   const handleCloseAdd = () => {
-    setOpen(false);
-    setTags([]);
+    setOpenAdd(false)
+    setTags([])
   };
 
-  // ============================================================================
+  const handleCloseEdit = () => {
+    setOpenEdit(false)
+  };
+
+  // ==================================== COMPONENTE =======================================
 
   return (
     <div>
@@ -214,12 +318,12 @@ function Agregar() {
       <div className="step-container">
         <Steps current={step}>
           <Steps.Item title="Datos Generales" status={statusStep1} />
-          <Steps.Item title="Localización" />
-          <Steps.Item title="Antecedentes" />
-          <Steps.Item title="Cadena de Valor" />
-          <Steps.Item title="Contactos" />
+          <Steps.Item title="Localización" status={statusStep2}/>
+          <Steps.Item title="Antecedentes" status={statusStep3}/>
+          <Steps.Item title="Cadena de Valor" status={statusStep4}/>
+          <Steps.Item title="Contactos" status={statusStep5}/>
         </Steps>
-        <br />
+        <br/>
         <Panel>
           {/* ============================ DATOS GENERALES ============================ */}
           {step === 0 ? (
@@ -295,16 +399,20 @@ function Agregar() {
               </Form.Group>
               {/* Descripción */}
               <Form.Group controlId="descripcion">
-                <Form.ControlLabel>Descripción *</Form.ControlLabel>
+                <Form.ControlLabel>Descripción de la empresa*</Form.ControlLabel>
                 <Form.Control
                   rows={3}
                   name="descripcion"
+                  maxLength={150}
                   accepter={Textarea}
                   defaultValue={formData.descripcion}
                   onChange={(e, e2) =>
                     setFormData({ ...formData, descripcion: e2.target.value })
                   }
                 />
+                <Form.HelpText>Breve descripción de las actividades de la empresa. Máx. 150 caracteres</Form.HelpText>
+
+              
               </Form.Group>
               {/* Link web */}
               <Form.Group controlId="link_web">
@@ -316,6 +424,8 @@ function Agregar() {
                     setFormData({ ...formData, link_web: e2.target.value })
                   }
                 />
+                <Form.HelpText>Web principal de la empresa, en caso de que no exista, link a LinkedIn o alguna web donde encontrar más información de la empresa</Form.HelpText>
+
               </Form.Group>
               {/* Link CRM */}
               <Form.Group controlId="link_CRM">
@@ -327,6 +437,8 @@ function Agregar() {
                     setFormData({ ...formData, link_crm: e2.target.value })
                   }
                 />
+                <Form.HelpText>La búsqueda de la empresa puede hacerse en <a href="https://crm.inti.gob.ar/index.php?module=Accounts&action=index"> USUARIOS EXTERNOS CRM</a>  filtrando en el ícono del embudo</Form.HelpText>
+
               </Form.Group>
             </Form>
           ) : null}
@@ -392,6 +504,9 @@ function Agregar() {
                     setFormData({ ...formData, parque_industrial: value })
                   }
                 />
+
+              <Form.HelpText style={{margin: '10px 0'}}> Cargar la ubicación de la PLANTA PRINCIPAL de la empresa</Form.HelpText>
+
               </Form.Group>
             </Form>
           ) : null}
@@ -451,7 +566,10 @@ function Agregar() {
                 Añadir antecedente
               </Button>
 
-              <Modal overflow={true} open={open} onClose={handleCloseAdd}>
+
+              {/* ==========================  MODAL AGREGAR =============================== */}
+
+              <Modal overflow={false} style={{translate: '0 -40px'}} open={openAdd} onClose={handleCloseAdd}>
                 <Modal.Header>
                   <Modal.Title>Añadir antecedente</Modal.Title>
                 </Modal.Header>
@@ -459,7 +577,7 @@ function Agregar() {
                   <Form fluid onSubmit={handleSubmitAgregarAntecedente}>
                     {/* RESUMEN */}
                     <Form.Group controlId="resumen">
-                      <Form.ControlLabel>RESUMEN</Form.ControlLabel>
+                      <Form.ControlLabel>RESUMEN *</Form.ControlLabel>
                       <Form.Control
                         rows={5}
                         name="textarea"
@@ -467,13 +585,13 @@ function Agregar() {
                         required
                       />
                       <Form.HelpText>
-                        Breve descripción del contacto con la empresa
+                        Breve descripción del contacto con la empresa/proyecto presentado
                       </Form.HelpText>
                     </Form.Group>
 
                     {/* PROGRAMA/MOTIVO */}
                     <Form.Group controlId="programa">
-                      <Form.ControlLabel>PROGRAMA/MOTIVO</Form.ControlLabel>
+                      <Form.ControlLabel>PROGRAMA/MOTIVO *</Form.ControlLabel>
                       <SelectPicker
                         required
                         data={programasSelect}
@@ -496,7 +614,7 @@ function Agregar() {
 
                     {/* ESTADO */}
                     <Form.Group controlId="estado">
-                      <Form.ControlLabel>ESTADO</Form.ControlLabel>
+                      <Form.ControlLabel>ESTADO *</Form.ControlLabel>
                       <SelectPicker
                         required
                         data={estados}
@@ -519,11 +637,160 @@ function Agregar() {
                       />
                     </Form.Group>
 
+                     {/* CIUDAD */}
+                     <Form.Group controlId="ciudad">
+                      <Form.ControlLabel>CIUDAD</Form.ControlLabel>
+                      <SelectPicker
+                        //ASYNC
+                        id="ciudad"
+                        data={test_herramientas}
+                        block
+                        placeholder="Seleccione la ciudad"
+                        tagProps={{ color: "red" }}
+                      />
+                    </Form.Group>
+
+                    {/* ASESORES */}
+                    <Form.Group controlId="asesores">
+                      <Form.ControlLabel>ASESORES</Form.ControlLabel>
+                      <TagPicker
+                        id="asesores"
+                        data={datos_asesores}
+                        block
+                        placeholder="Seleccione los asesores"
+                        tagProps={{ color: "green" }}
+                        placement="auto"
+                      />
+                    </Form.Group>
+
+
                     <Button appearance="primary" type="submit">
                       Guardar
                     </Button>
                     <Button
                       onClick={handleCloseAdd}
+                      appearance="subtle"
+                      color="red"
+                      style={{ margin: "0 10px" }}
+                    >
+                      Cancelar
+                    </Button>
+                  </Form>
+                </Modal.Body>
+              </Modal>
+
+              {/* ==========================  MODAL EDITAR =============================== */}
+              <Modal overflow={false} style={{translate: '0 -30px'}} open={openEdit} onClose={handleCloseEdit}>
+                <Modal.Header>
+                  <Modal.Title>Editar antecedente</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  <Form fluid onSubmit={handleSubmitAgregarAntecedente}>
+                    {/* RESUMEN */}
+                    <Form.Group controlId="resumen">
+                      <Form.ControlLabel>RESUMEN</Form.ControlLabel>
+                      <Form.Control
+                        rows={5}
+                        name="textarea"
+                        accepter={Textarea}
+                        required
+                        defaultValue={antecedenteEditable.resumen}
+                      >
+                      </Form.Control>
+                      <Form.HelpText>
+                        Breve descripción del contacto con la empresa
+                      </Form.HelpText>
+                    </Form.Group>
+
+                    {/* PROGRAMA/MOTIVO */}
+                    <Form.Group controlId="programa">
+                      <Form.ControlLabel>PROGRAMA/MOTIVO *</Form.ControlLabel>
+                      <SelectPicker
+                        required
+                        data={programasSelect}
+                        searchable={false}
+                        placeholder="Seleccione un programa"
+                        block
+                        id="programa"
+                        defaultValue={antecedenteEditable.motivo}
+                      >
+                      </SelectPicker>
+                    </Form.Group>
+
+                    {/* AÑO */}
+                    <Form.Group controlId="año">
+                      <Form.ControlLabel>AÑO *</Form.ControlLabel>
+                      <AutoComplete
+                        block
+                        data={añosSelect}
+                        placeholder="Seleccione un año"
+                        defaultValue={antecedenteEditable.año}
+                      />
+                    </Form.Group>
+
+                    {/* ESTADO */}
+                    <Form.Group controlId="estado">
+                      <Form.ControlLabel>ESTADO *</Form.ControlLabel>
+                      <SelectPicker
+                        required
+                        data={estados}
+                        searchable={false}
+                        placeholder="Seleccione el estado"
+                        block
+                        id="estado"
+                        defaultValue={antecedenteEditable.estado}
+                      />
+                    </Form.Group>
+
+                    {/* HERRAMIENTAS */}
+                    <Form.Group controlId="herramientas">
+                      <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
+                      <TagPicker
+                        id="herramientas"
+                        data={test_herramientas}
+                        block
+                        placeholder="Seleccione las herramientas"
+                        tagProps={{ color: "red" }}
+                        defaultValue={antecedenteEditable.herramientas}
+                      />
+                    </Form.Group>
+
+                    
+                     {/* CIUDAD */}
+                     <Form.Group controlId="ciudad">
+                      <Form.ControlLabel>CIUDAD *</Form.ControlLabel>
+                      <SelectPicker
+                        //ASYNC
+                        id="ciudad"
+                        data={test_herramientas}
+                        block
+                        placeholder="Seleccione la ciudad"
+                        tagProps={{ color: "red" }}
+                        defaultValue={antecedenteEditable.ciudad}
+                      />
+                    </Form.Group>
+
+                    {/* ASESORES */}
+                    <Form.Group controlId="asesores">
+                      <Form.ControlLabel>ASESORES *</Form.ControlLabel>
+                      <TagPicker
+                        id="asesores"
+                        data={datos_asesores}
+                        block
+                        placeholder="Seleccione los asesores"
+                        tagProps={{ color: "green" }}
+                        defaultValue={antecedenteEditable.asesores}
+                        placement="autoVerticalStart"
+                      />
+                    </Form.Group>
+
+                    
+
+                    <Button appearance="primary" type="submit">
+                      Guardar
+                    </Button>
+                    <Button
+                      onClick={handleCloseEdit}
                       appearance="subtle"
                       color="red"
                       style={{ margin: "0 10px" }}
@@ -539,7 +806,7 @@ function Agregar() {
           {/* ============================= CADENA DE VALOR =============================== */}
         </Panel>
         <br />
-        <ButtonGroup>
+        <ButtonGroup style={{margin: '10px 0 80px 0'}}>
           <Button
             onClick={onPrevious}
             disabled={step === 0}
