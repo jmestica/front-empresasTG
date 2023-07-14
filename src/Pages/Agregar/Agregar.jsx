@@ -1,4 +1,4 @@
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
 import {
   Steps,
   Panel,
@@ -19,6 +19,10 @@ import {
 } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
+
+import axios from 'axios';
+import API_BASE_URL from '../../config';
+
 import "./agregar.css";
 
 // eslint-disable-next-line react/display-name
@@ -35,7 +39,7 @@ const tamaños_select = [
   "No conocido",
 ].map((item) => ({ label: item, value: item }));
 
-const provincias_select = ["Neuquén", "Río Negro", "Chubut", "Santa Cruz"].map(
+const provincias_select = ["Neuquén", "Río Negro", "Chubut", "Santa Cruz", "Tierra del Fuego"].map(
   (item) => ({ label: item, value: item })
 );
 
@@ -104,20 +108,12 @@ function Agregar() {
 
   //Datos de localización
   const [ciudades, setCiudades] = useState([]);
+  const [ciudadesBusqueda, setCiudadesBusqueda] = useState([]);
   const [parques, setParques] = useState([]);
   const [ciudadesDisabled, setCiudadesDisabled] = useState(true);
   const [parquesDisabled, setParquesDisabled] = useState(true);
 
   //Datos de antecedentes
-  const test_herramientas = [
-    "5S",
-    "PDCA",
-    "Kaizen",
-    "Layout",
-    "SMED",
-    "TPM",
-  ].map((item) => ({ label: item, value: item }));
-
   const datos_asesores = [
     "Alonso Diana",
     "Alvez Pricila",
@@ -131,7 +127,7 @@ function Agregar() {
   ].map((item) => ({ label: item, value: item }));
 
   //traer de api
-  const [herramientas, setHerramientas] = useState(test_herramientas);
+  const [herramientas, setHerramientas] = useState([]);
   const [sectores, setSectores] = useState();
 
   const [antecedenteEditable, setAntecedenteEditable] = useState({});
@@ -209,26 +205,63 @@ function Agregar() {
 
   //================================  HANDLERS ====================================
 
-  const handleProvinciaSelect = (value) => {
+  const handleProvinciaSelect = async (value) => {
+
+    let nombres_ciudades = []
+
     setFormData({ ...formData, provincia: value });
 
-    //fetch api con value seleccionado para obtener las ciudades de esa provincia
+    const response = await axios.get(`${API_BASE_URL}/ciudades/${value}`)
+
+    response.data.map((ciudad)=>{nombres_ciudades.push(ciudad.nombre_ciudad)})
+
+    nombres_ciudades = nombres_ciudades.map((item) => ({ label: item, value: item }))
+
+    setCiudades(nombres_ciudades)
     setCiudadesDisabled(false);
   };
 
-  const handleCiudadSelect = (value) => {
-    //fetch api con value seleccionado para obtener las parques de esa ciudad
-    setParquesDisabled(false);
+  const handleCiudadSelect = async (value) => {
+
+    let nombre_parques = []
 
     setFormData({ ...formData, ciudad: value });
 
-    const parques_select = ["No pertenece a parque"].map((item) => ({
-      label: item,
-      value: item,
-    }));
+    const response = await axios.get(`${API_BASE_URL}/parques/${value}`)
 
-    setParques(parques_select);
+    console.log(response.data)
+
+    response.data.map((parque)=>{nombre_parques.push(parque.nombre_parque)})
+
+    nombre_parques = nombre_parques.map((item) => ({ label: item, value: item }))
+
+    nombre_parques.push({label:'No pertenece a parque', item: 'No pertenece a parque'})
+
+    setParques(nombre_parques);
+
+    setParquesDisabled(false);
   };
+
+
+  const busquedaCiudades = async (value) => {
+
+    if(value.length >= 3){
+
+        let ciudades_buscadas = []
+        const busqueda = await axios.get(`${API_BASE_URL}/ciudades/search/${value}`)
+
+        busqueda.data.map((ciudad) => {ciudades_buscadas.push(ciudad.nombre_ciudad)})
+
+        ciudades_buscadas = ciudades_buscadas.map((item) => ({ label: item, value: item }))
+
+        setCiudadesBusqueda(ciudades_buscadas)
+    }
+    
+
+  };
+  
+
+
 
   const handleSubmitAgregarAntecedente = (e, e2) => {
     //Generación de objetos
@@ -364,6 +397,41 @@ function Agregar() {
   }
 
   // ==================================== COMPONENTE =======================================
+
+  useEffect(() => {
+    const fetchDatos = async () => {
+      try {
+        //===============================FETCH DATOS=============================
+        let fetchSectores = []
+        let fetchHerramientas = []
+
+        //Sectores
+        const response_sectores = await axios.get(`${API_BASE_URL}/sectores`);
+        
+        response_sectores.data.map((sector)=>{fetchSectores.push(sector.nombre_sector)})
+
+        fetchSectores = fetchSectores.map((item) => ({ label: item, value: item }))
+
+        setSectores(fetchSectores);
+
+        //Herramientas
+        const response_herramientas = await axios.get(`${API_BASE_URL}/herramientas`)
+        
+        response_herramientas.data.map((herramienta)=>{fetchHerramientas.push(herramienta.nombre_herramienta)})
+
+        fetchHerramientas  = fetchHerramientas.map((item) => ({ label: item, value: item }))
+
+        setHerramientas(fetchHerramientas)
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDatos();
+  }, []);
+
+//============================================================================================
 
   return (
     <div>
@@ -542,7 +610,7 @@ function Agregar() {
                 <SelectPicker
                   defaultValue={formData.ciudad}
                   id="ciudad"
-                  data={provincias_select}
+                  data={ciudades}
                   block
                   placeholder="Seleccione una ciudad"
                   searchable={true}
@@ -551,7 +619,7 @@ function Agregar() {
                     formData.ciudad = "";
                   }}
                   disabled={ciudadesDisabled}
-                  onSelect={handleCiudadSelect}
+                  onSelect={async (value)=> {await handleCiudadSelect(value)}}
                 />
               </Form.Group>
 
@@ -705,8 +773,9 @@ function Agregar() {
                       <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
                       <TagPicker
                         id="herramientas"
-                        data={test_herramientas}
+                        data={herramientas}
                         block
+                        placement="auto"
                         placeholder="Seleccione las herramientas"
                         tagProps={{ color: "red" }}
                       />
@@ -716,9 +785,9 @@ function Agregar() {
                     <Form.Group controlId="ciudad">
                       <Form.ControlLabel>CIUDAD</Form.ControlLabel>
                       <SelectPicker
-                        //ASYNC
+                        onSearch={async (value)=>{await busquedaCiudades(value)}}
                         id="ciudad"
-                        data={test_herramientas}
+                        data={ciudadesBusqueda}
                         block
                         placeholder="Seleccione la ciudad"
                         tagProps={{ color: "red" }}
@@ -824,7 +893,7 @@ function Agregar() {
                       <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
                       <TagPicker
                         id="herramientas"
-                        data={test_herramientas}
+                        data={herramientas}
                         block
                         placeholder="Seleccione las herramientas"
                         tagProps={{ color: "red" }}
@@ -838,7 +907,7 @@ function Agregar() {
                       <SelectPicker
                         //ASYNC
                         id="ciudad"
-                        data={test_herramientas}
+                        data={herramientas}
                         block
                         placeholder="Seleccione la ciudad"
                         tagProps={{ color: "red" }}
@@ -888,7 +957,7 @@ function Agregar() {
                     required
                     block
                     //GET DATA
-                    data={test_herramientas}
+                    data={sectores}
                     id="sector_pertenece"
                     searchable={true}
                     placeholder="Seleccione un sector"
@@ -913,7 +982,7 @@ function Agregar() {
                   </Form.ControlLabel>
                   <TagPicker
                     id="sectores_provee"
-                    data={test_herramientas}
+                    data={sectores}
                     block
                     placeholder="Seleccione los sectores"
                     tagProps={{ color: "orange" }}
