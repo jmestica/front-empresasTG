@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import {
   Steps,
   Panel,
@@ -15,14 +15,14 @@ import {
   Notification,
   TagInput,
   useToaster,
+  PanelGroup
 } from "rsuite";
 
 const { Column, HeaderCell, Cell } = Table;
 import "./agregar.css";
-import React from "react";
 
 // eslint-disable-next-line react/display-name
-const Textarea = React.forwardRef((props, ref) => (
+const Textarea = forwardRef((props, ref) => (
   <Input {...props} as="textarea" ref={ref} />
 ));
 
@@ -197,9 +197,11 @@ function Agregar() {
       if (!formData.sector_pertenece || !formData.sectores_provee.length > 0) {
         setStatusStep4("error");
       } else {
-        setStatusStep3("finish");
+        setStatusStep4("finish");
       }
     }
+
+
   };
 
   const onNext = () => onChange(step + 1);
@@ -327,21 +329,22 @@ function Agregar() {
       setHeader("Campos obligatorios");
       toaster.push(notificacion);
     } else {
-      if (
-        formData.contactos.some(
-          (contacto) =>
-            contacto.nombre === nuevo_contacto.nombre ||
-            contacto.email === nuevo_contacto.email ||
-            contacto.telefono === nuevo_contacto.telefono
-        )
-      ) {
+      const existeContacto = formData.contactos.some((contacto) => {
+        return (
+          contacto.nombre === nuevo_contacto.nombre ||
+          (contacto.email === nuevo_contacto.email &&
+            contacto.telefono === nuevo_contacto.telefono)
+        );
+      });
+
+      if (!existeContacto) {
+
         setFormData({
           ...formData,
           contactos: [...formData.contactos, nuevo_contacto],
         });
 
-
-        //AÑADIR CARD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        e2.target.reset()
 
       } else {
         setMessage("El contacto ya está registrado");
@@ -351,6 +354,14 @@ function Agregar() {
       }
     }
   };
+
+
+  const handleDeleteContacto = (index) => {
+    let contactosUpdate = formData.contactos
+    contactosUpdate.splice(index, 1)
+
+    setFormData({...formData, contactos: contactosUpdate});
+  }
 
   // ==================================== COMPONENTE =======================================
 
@@ -493,9 +504,8 @@ function Agregar() {
                     rel="noreferrer"
                     href="https://crm.inti.gob.ar/index.php?module=Accounts&action=index"
                   >
-                    {" "}
                     USUARIOS EXTERNOS CRM
-                  </a>{" "}
+                  </a>
                   filtrando en el ícono del embudo
                 </Form.HelpText>
               </Form.Group>
@@ -888,6 +898,7 @@ function Agregar() {
                     onClean={() =>
                       setFormData({ ...formData, sector_pertenece: "" })
                     }
+                    defaultValue={formData.sector_pertenece}
                   />
                   <Form.HelpText>
                     Sector principal al cual PERTENECE la empresa
@@ -910,6 +921,7 @@ function Agregar() {
                     onSelect={(value) => {
                       setFormData({ ...formData, sectores_provee: value });
                     }}
+                    defaultValue={formData.sectores_provee}
                   />
                   <Form.HelpText>
                     Al menos uno o varios sectores a los cuales brinda
@@ -925,16 +937,19 @@ function Agregar() {
                   <TagInput
                     onCreate={(value, item) => {
                       setFormData({ ...formData, clae: value });
+                      // Test item
+                      console.log(item);
                     }}
                     maxLength={6}
                     style={{ width: "100%" }}
                     tagProps={{ color: "violet" }}
+                    defaultValue={formData.clae}
                     block
                   />
 
                   <Form.HelpText>
                     Agregue los códigos de CLAE, los mismos se pueden encontrar
-                    en CUIT ONLINE.
+                    en <a href="https://www.cuitonline.com/" target="_blank" rel="noreferrer">CUIT ONLINE</a>.
                   </Form.HelpText>
                 </Form.Group>
               </Form>
@@ -972,10 +987,57 @@ function Agregar() {
                   Agregar contacto
                 </Button>
               </Form>
+
+
+            {/* Cards de contactos */}
+              <PanelGroup style={{margin: '10px 0'}} accordion defaultActiveKey={1} bordered>
+              
+              {/* Para cada contacto se crea un panel con los datos y la opción de borrar */}
+              {formData.contactos.map((contacto, index) => (
+                <Panel header={contacto.nombre} key={contacto.nombre} eventKey={index} id={`panel${index}`}>
+                    <p className="header">Teléfono</p>
+                    <p>{contacto.telefono}</p>
+                    <p className="header">Mail</p>
+                    <p>{contacto.email}</p>
+                    <p className="header">Puesto</p>
+                    <p>{contacto.puesto}</p>
+                    <br />
+                    <Button appearance="primary" color="red" onClick={() => handleDeleteContacto(index)}>Eliminar Contacto</Button>
+                </Panel>
+              ))}
+
+              </PanelGroup>
+            
+              <Button appearance="primary" color="green" block disabled={statusStep1 === 'error' || statusStep2  === 'error' || statusStep4 === 'error'}>
+                  Cargar empresa
+              </Button>
+              
+              {statusStep1 === 'error'?
+              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
+                Hay datos obligatorios incompletos en el paso 1
+              </Form.HelpText>
+              : null}
+
+              {statusStep2 === 'error'?
+              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
+                Hay datos obligatorios incompletos en el paso 2
+              </Form.HelpText>
+              : null}
+
+              {statusStep4 === 'error'?
+              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
+                Hay datos obligatorios incompletos en el paso 4
+              </Form.HelpText>
+              : null}
+
+
             </>
           ) : null}
         </Panel>
         <br />
+
+            
+
         <ButtonGroup style={{ margin: "10px 0 80px 0" }}>
           <Button
             onClick={onPrevious}
