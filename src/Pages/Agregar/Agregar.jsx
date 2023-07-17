@@ -13,10 +13,14 @@ import {
   TagPicker,
   AutoComplete,
   Notification,
-  TagInput,
+  IconButton,
   useToaster,
-  PanelGroup
+  PanelGroup,
 } from "rsuite";
+
+import SearchIcon from '@rsuite/icons/Search';
+import CloseIcon from '@rsuite/icons/Close';
+
 
 const { Column, HeaderCell, Cell } = Table;
 
@@ -126,11 +130,11 @@ function Agregar() {
     "Rico Abel Adolfo",
   ].map((item) => ({ label: item, value: item }));
 
-  //traer de api
-  const [herramientas, setHerramientas] = useState([]);
-  const [sectores, setSectores] = useState();
+  const [herramientas, setHerramientas] = useState([])
+  const [sectores, setSectores] = useState()
+  const [claesEmpresa, setClaesEmpresa] = useState([])
 
-  const [antecedenteEditable, setAntecedenteEditable] = useState({});
+  const [antecedenteEditable, setAntecedenteEditable] = useState({})
 
   // ============================ NOTIFICACIÓN =======================
 
@@ -229,13 +233,11 @@ function Agregar() {
 
     const response = await axios.get(`${API_BASE_URL}/parques/${value}`)
 
-    console.log(response.data)
-
     response.data.map((parque)=>{nombre_parques.push(parque.nombre_parque)})
 
     nombre_parques = nombre_parques.map((item) => ({ label: item, value: item }))
 
-    nombre_parques.push({label:'No pertenece a parque', item: 'No pertenece a parque'})
+    nombre_parques.push({label:'No pertenece a parque', value: 'No pertenece a parque'})
 
     setParques(nombre_parques);
 
@@ -260,9 +262,6 @@ function Agregar() {
 
   };
   
-
-
-
   const handleSubmitAgregarAntecedente = (e, e2) => {
     //Generación de objetos
     const herramientas = e2.target.herramientas.defaultValue.split(",");
@@ -394,6 +393,67 @@ function Agregar() {
     contactosUpdate.splice(index, 1)
 
     setFormData({...formData, contactos: contactosUpdate});
+  }
+
+
+  const obtenerClae = async (e) => {
+
+
+    const codigo = e.target.value
+
+    if(!isNaN(parseFloat(codigo)) && isFinite(codigo) ){
+
+        const descripcion_clae = await axios.get(`${API_BASE_URL}/clae/${codigo}`)
+
+        if(descripcion_clae.data.length === 1){
+
+          if(!formData.clae.includes(codigo)){
+          
+          setFormData({...formData, clae: [...formData.clae, codigo]})
+
+          setClaesEmpresa([...claesEmpresa, descripcion_clae.data[0]] )
+          
+          } 
+
+        } else {
+
+            setType('error')
+            setHeader('No encontrado')
+            setMessage('El código ingresado no existe')
+
+            toaster.push(notificacion)
+
+        }
+
+    }
+
+    e.target.value =''
+   
+
+  }
+
+  const borrarClae = (clae) => {
+
+    //Borrado del formulario
+    let claeUpdate = formData.clae
+
+    const index = claeUpdate.indexOf(clae)
+
+    if (index > -1) {
+      claeUpdate.splice(index, 1)
+    }
+
+    setFormData({...formData, clae: claeUpdate})
+
+    //Borrado de claes encontrados
+
+    let claesEncontradosUpdate = claesEmpresa
+
+    claesEncontradosUpdate = claesEncontradosUpdate.filter(item => clae !== item.codigo_clae )
+
+    setClaesEmpresa(claesEncontradosUpdate)
+
+
   }
 
   // ==================================== COMPONENTE =======================================
@@ -616,7 +676,7 @@ function Agregar() {
                   searchable={true}
                   onClean={() => {
                     setParquesDisabled(true);
-                    formData.ciudad = "";
+                    setFormData({...formData, ciudad: "", parque_industrial: "" });
                   }}
                   disabled={ciudadesDisabled}
                   onSelect={async (value)=> {await handleCiudadSelect(value)}}
@@ -637,8 +697,8 @@ function Agregar() {
                   placeholder="Seleccione un parque"
                   searchable={false}
                   disabled={parquesDisabled}
-                  onSelect={(value) =>
-                    setFormData({ ...formData, parque_industrial: value })
+                  onSelect={(value) => {
+                    setFormData({ ...formData, parque_industrial: value })}
                   }
                 />
 
@@ -1002,25 +1062,38 @@ function Agregar() {
                   <Form.ControlLabel>
                     CLAE - Clasificador de actividad económica
                   </Form.ControlLabel>
+                
+                  
+                  <InputGroup>
+                      <Input id="codigo_clae" onPressEnter={obtenerClae}/>
+                  <InputGroup.Button>
+                    <SearchIcon />
+                  </InputGroup.Button>
+                </InputGroup>
 
-                  <TagInput
-                    onCreate={(value, item) => {
-                      setFormData({ ...formData, clae: value });
-                      // Test item
-                      console.log(item);
-                    }}
-                    maxLength={6}
-                    style={{ width: "100%" }}
-                    tagProps={{ color: "violet" }}
-                    defaultValue={formData.clae}
-                    block
-                  />
-
+                  
+      
                   <Form.HelpText>
                     Agregue los códigos de CLAE, los mismos se pueden encontrar
                     en <a href="https://www.cuitonline.com/" target="_blank" rel="noreferrer">CUIT ONLINE</a>.
                   </Form.HelpText>
                 </Form.Group>
+
+                <p className="header">CLAES ENCONTRADOS</p>
+                <Form.HelpText style={{fontSize: 15, color: "black"}}>
+
+                  {claesEmpresa.length>0 ? claesEmpresa.map(clae => {
+                      return <div key={clae.codigo_clae} style={{display: 'flex', justifyContent: 'space-between', margin: '5px 20px'}}><p> {clae.codigo_clae}  -  {clae.seccion_clae}  - {clae.descripcion_actividad}</p>
+                      
+                      <IconButton style={{float: 'right'}} appearance="primary" color="red" icon={<CloseIcon />} circle size="xs" onClick={()=>{ borrarClae(clae.codigo_clae)}} />
+                      </div>
+                  
+                  }): <p>-</p>}    
+
+                </Form.HelpText>
+                  
+
+
               </Form>
             </>
           ) : null}
@@ -1043,7 +1116,7 @@ function Agregar() {
                 </Form.Group>
                 <Form.Group controlId="telefono">
                   <Form.ControlLabel>TELÉFONO</Form.ControlLabel>
-                  <Form.Control name="telefono" type="phone" />
+                  <Form.Control name="telefono" type="tel" />
                 </Form.Group>
 
                 <Form.HelpText>
