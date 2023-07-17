@@ -54,6 +54,7 @@ const programasSelect = [
   "PAC",
   "PRODUCTIVIDAD 4.0",
   "AT Sin Financiamiento",
+  "Otro"
 ].map((item) => ({ label: item, value: item }));
 
 const estados = [
@@ -128,6 +129,11 @@ function Agregar() {
     "Mestica Juan Martín",
     "Plache Agustín Nicolás",
     "Rico Abel Adolfo",
+    "Laura Tejada",
+    "Juan Manuel Rubino",
+    "Luciano Girolimini",
+    "Antonio Susca",
+    "Mariana Ganuza"
   ].map((item) => ({ label: item, value: item }));
 
   const [herramientas, setHerramientas] = useState([])
@@ -453,6 +459,13 @@ function Agregar() {
 
     setClaesEmpresa(claesEncontradosUpdate)
 
+  }
+
+  const cargarEmpresa = async () => {
+
+      const response = await axios.post(`${API_BASE_URL}/empresas`, formData)
+
+
 
   }
 
@@ -518,7 +531,7 @@ function Agregar() {
               <Form.Group controlId="cuit">
                 <Form.ControlLabel>CUIT *</Form.ControlLabel>
                 <InputGroup>
-                  <Input value={30} style={{ textAlign: "center" }} />
+                  <Input maxLength={2} style={{ textAlign: "center" }} />
                   <InputGroup.Addon>-</InputGroup.Addon>
                   <Input
                     style={{ textAlign: "center", width: "200px" }}
@@ -587,7 +600,7 @@ function Agregar() {
                 <Form.Control
                   rows={3}
                   name="descripcion"
-                  maxLength={150}
+                  maxLength={250}
                   accepter={Textarea}
                   defaultValue={formData.descripcion}
                   onChange={(e, e2) =>
@@ -1150,7 +1163,7 @@ function Agregar() {
 
               </PanelGroup>
             
-              <Button appearance="primary" color="green" block disabled={statusStep1 === 'error' || statusStep2  === 'error' || statusStep4 === 'error'}>
+              <Button appearance="primary" color="green" onClick={()=>{cargarEmpresa()}} block disabled={statusStep1 === 'error' || statusStep2  === 'error' || statusStep4 === 'error'}>
                   Cargar empresa
               </Button>
               
