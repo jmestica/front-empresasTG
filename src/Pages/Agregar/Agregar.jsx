@@ -16,18 +16,20 @@ import {
   IconButton,
   useToaster,
   PanelGroup,
+  Message,
 } from "rsuite";
 
-import SearchIcon from '@rsuite/icons/Search';
-import CloseIcon from '@rsuite/icons/Close';
-
+import SearchIcon from "@rsuite/icons/Search";
+import CloseIcon from "@rsuite/icons/Close";
 
 const { Column, HeaderCell, Cell } = Table;
 
-import axios from 'axios';
-import API_BASE_URL from '../../config';
+import axios from "axios";
+import API_BASE_URL from "../../config";
 
 import "./agregar.css";
+import { useSearch } from "rsuite/esm/Picker";
+import { useNavigate } from "react-router-dom";
 
 // eslint-disable-next-line react/display-name
 const Textarea = forwardRef((props, ref) => (
@@ -43,9 +45,13 @@ const tamaños_select = [
   "No conocido",
 ].map((item) => ({ label: item, value: item }));
 
-const provincias_select = ["Neuquén", "Río Negro", "Chubut", "Santa Cruz", "Tierra del Fuego"].map(
-  (item) => ({ label: item, value: item })
-);
+const provincias_select = [
+  "Neuquén",
+  "Río Negro",
+  "Chubut",
+  "Santa Cruz",
+  "Tierra del Fuego",
+].map((item) => ({ label: item, value: item }));
 
 const programasSelect = [
   "Kaizen Tango",
@@ -54,7 +60,8 @@ const programasSelect = [
   "PAC",
   "PRODUCTIVIDAD 4.0",
   "AT Sin Financiamiento",
-  "Otro"
+  "Programa PAE",
+  "Otro",
 ].map((item) => ({ label: item, value: item }));
 
 const estados = [
@@ -73,6 +80,7 @@ const añosSelect = ["2023", "2022", "2021", "2020", "2019"];
 
 function Agregar() {
   //================================== STATES ===================================
+  const navigate = useNavigate();
 
   //Formulario de pasos
   const [step, setStep] = useState(0);
@@ -84,7 +92,7 @@ function Agregar() {
 
   //Datos del formulario
   const [formData, setFormData] = useState({
-    cuit1: "30",
+    cuit1: "",
     cuit2: "",
     cuit3: "",
     tamaño_sepyme: "",
@@ -119,28 +127,13 @@ function Agregar() {
   const [parquesDisabled, setParquesDisabled] = useState(true);
 
   //Datos de antecedentes
-  const datos_asesores = [
-    "Alonso Diana",
-    "Alvez Pricila",
-    "Bribarelli María Virginia",
-    "Lizzadro Carolina",
-    "Maidana Ain",
-    "Mazzitelli Nicolás Pedro",
-    "Mestica Juan Martín",
-    "Plache Agustín Nicolás",
-    "Rico Abel Adolfo",
-    "Laura Tejada",
-    "Juan Manuel Rubino",
-    "Luciano Girolimini",
-    "Antonio Susca",
-    "Mariana Ganuza"
-  ].map((item) => ({ label: item, value: item }));
+  const [asesores, setAsesores] = useState([]);
 
-  const [herramientas, setHerramientas] = useState([])
-  const [sectores, setSectores] = useState()
-  const [claesEmpresa, setClaesEmpresa] = useState([])
+  const [herramientas, setHerramientas] = useState([]);
+  const [sectores, setSectores] = useState();
+  const [claesEmpresa, setClaesEmpresa] = useState([]);
 
-  const [antecedenteEditable, setAntecedenteEditable] = useState({})
+  const [antecedenteEditable, setAntecedenteEditable] = useState({});
 
   // ============================ NOTIFICACIÓN =======================
 
@@ -206,8 +199,6 @@ function Agregar() {
         setStatusStep4("finish");
       }
     }
-
-
   };
 
   const onNext = () => onChange(step + 1);
@@ -216,58 +207,71 @@ function Agregar() {
   //================================  HANDLERS ====================================
 
   const handleProvinciaSelect = async (value) => {
-
-    let nombres_ciudades = []
+    let nombres_ciudades = [];
 
     setFormData({ ...formData, provincia: value });
 
-    const response = await axios.get(`${API_BASE_URL}/ciudades/${value}`)
+    const response = await axios.get(`${API_BASE_URL}/ciudades/${value}`);
 
-    response.data.map((ciudad)=>{nombres_ciudades.push(ciudad.nombre_ciudad)})
+    response.data.map((ciudad) => {
+      nombres_ciudades.push(ciudad.nombre_ciudad);
+    });
 
-    nombres_ciudades = nombres_ciudades.map((item) => ({ label: item, value: item }))
+    nombres_ciudades = nombres_ciudades.map((item) => ({
+      label: item,
+      value: item,
+    }));
 
-    setCiudades(nombres_ciudades)
+    setCiudades(nombres_ciudades);
     setCiudadesDisabled(false);
   };
 
   const handleCiudadSelect = async (value) => {
-
-    let nombre_parques = []
+    let nombre_parques = [];
 
     setFormData({ ...formData, ciudad: value });
 
-    const response = await axios.get(`${API_BASE_URL}/parques/${value}`)
+    const response = await axios.get(`${API_BASE_URL}/parques/${value}`);
 
-    response.data.map((parque)=>{nombre_parques.push(parque.nombre_parque)})
+    response.data.map((parque) => {
+      nombre_parques.push(parque.nombre_parque);
+    });
 
-    nombre_parques = nombre_parques.map((item) => ({ label: item, value: item }))
+    nombre_parques = nombre_parques.map((item) => ({
+      label: item,
+      value: item,
+    }));
 
-    nombre_parques.push({label:'No pertenece a parque', value: 'No pertenece a parque'})
+    nombre_parques.push({
+      label: "No pertenece a parque",
+      value: "No pertenece a parque",
+    });
 
     setParques(nombre_parques);
 
     setParquesDisabled(false);
   };
 
-
   const busquedaCiudades = async (value) => {
+    if (value.length >= 3) {
+      let ciudades_buscadas = [];
+      const busqueda = await axios.get(
+        `${API_BASE_URL}/ciudades/search/${value}`
+      );
 
-    if(value.length >= 3){
+      busqueda.data.map((ciudad) => {
+        ciudades_buscadas.push(ciudad.nombre_ciudad);
+      });
 
-        let ciudades_buscadas = []
-        const busqueda = await axios.get(`${API_BASE_URL}/ciudades/search/${value}`)
+      ciudades_buscadas = ciudades_buscadas.map((item) => ({
+        label: item,
+        value: item,
+      }));
 
-        busqueda.data.map((ciudad) => {ciudades_buscadas.push(ciudad.nombre_ciudad)})
-
-        ciudades_buscadas = ciudades_buscadas.map((item) => ({ label: item, value: item }))
-
-        setCiudadesBusqueda(ciudades_buscadas)
+      setCiudadesBusqueda(ciudades_buscadas);
     }
-    
-
   };
-  
+
   const handleSubmitAgregarAntecedente = (e, e2) => {
     //Generación de objetos
     const herramientas = e2.target.herramientas.defaultValue.split(",");
@@ -296,6 +300,82 @@ function Agregar() {
       });
 
       handleCloseAdd();
+    } else {
+      setMessage("Hay campos obligatorios incompletos");
+      setType("error");
+      setHeader("Campos obligatorios");
+      toaster.push(notificacion);
+    }
+  };
+
+  function sonArraysIguales(array1, array2) {
+    if (array1.length !== array2.length) {
+      return false;
+    }
+
+    for (let i = 0; i < array1.length; i++) {
+      if (array1[i] !== array2[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  const esDiferente = (obj) => {
+    return (
+      obj.resumen !== antecedenteEditable.resumen ||
+      obj.motivo !== antecedenteEditable.motivo ||
+      obj.año !== antecedenteEditable.año ||
+      obj.estado !== antecedenteEditable.estado ||
+      obj.ciudad !== antecedenteEditable.ciudad ||
+      !sonArraysIguales(obj.herramientas, antecedenteEditable.herramientas) ||
+      !sonArraysIguales(obj.asesores, antecedenteEditable.asesores)
+    );
+  };
+
+  const handleSubmitEditarAntecedente = (e, e2) => {
+    //Generación de objetos
+    const herramientas = e2.target.herramientas.defaultValue.split(",");
+    const asesores = e2.target.asesores.defaultValue.split(",");
+
+    const nuevo_antecedente = {
+      resumen: e2.target.resumen.value,
+      motivo: e2.target.programa.defaultValue,
+      año: e2.target.año.defaultValue,
+      estado: e2.target.estado.defaultValue,
+      herramientas: herramientas,
+      ciudad: e2.target.ciudad.defaultValue,
+      asesores: asesores,
+    };
+
+    //Validación de campos obligatorios
+    if (
+      nuevo_antecedente.resumen &&
+      nuevo_antecedente.motivo &&
+      nuevo_antecedente.año &&
+      nuevo_antecedente.estado
+    ) {
+      if (esDiferente(nuevo_antecedente)) {
+        let antecedenteUpdate = formData.antecedentes;
+
+        antecedenteUpdate = antecedenteUpdate.filter(
+          (obj) =>
+            obj.motivo !== nuevo_antecedente.motivo ||
+            obj.año !== nuevo_antecedente.año
+        );
+
+        antecedenteUpdate.push(nuevo_antecedente);
+
+        setFormData({
+          ...formData,
+          antecedentes: antecedenteUpdate,
+        });
+
+        handleCloseEdit();
+      } else {
+        handleCloseEdit();
+      }
     } else {
       setMessage("Hay campos obligatorios incompletos");
       setType("error");
@@ -376,14 +456,12 @@ function Agregar() {
       });
 
       if (!existeContacto) {
-
         setFormData({
           ...formData,
           contactos: [...formData.contactos, nuevo_contacto],
         });
 
-        e2.target.reset()
-
+        e2.target.reset();
       } else {
         setMessage("El contacto ya está registrado");
         setType("error");
@@ -393,81 +471,89 @@ function Agregar() {
     }
   };
 
-
   const handleDeleteContacto = (index) => {
-    let contactosUpdate = formData.contactos
-    contactosUpdate.splice(index, 1)
+    let contactosUpdate = formData.contactos;
+    contactosUpdate.splice(index, 1);
 
-    setFormData({...formData, contactos: contactosUpdate});
-  }
-
+    setFormData({ ...formData, contactos: contactosUpdate });
+  };
 
   const obtenerClae = async (e) => {
+    const codigo = e.target.value;
 
+    if (!isNaN(parseFloat(codigo)) && isFinite(codigo)) {
+      const descripcion_clae = await axios.get(
+        `${API_BASE_URL}/clae/${codigo}`
+      );
 
-    const codigo = e.target.value
+      if (descripcion_clae.data.length === 1) {
+        if (!formData.clae.includes(codigo)) {
+          setFormData({ ...formData, clae: [...formData.clae, codigo] });
 
-    if(!isNaN(parseFloat(codigo)) && isFinite(codigo) ){
-
-        const descripcion_clae = await axios.get(`${API_BASE_URL}/clae/${codigo}`)
-
-        if(descripcion_clae.data.length === 1){
-
-          if(!formData.clae.includes(codigo)){
-          
-          setFormData({...formData, clae: [...formData.clae, codigo]})
-
-          setClaesEmpresa([...claesEmpresa, descripcion_clae.data[0]] )
-          
-          } 
-
-        } else {
-
-            setType('error')
-            setHeader('No encontrado')
-            setMessage('El código ingresado no existe')
-
-            toaster.push(notificacion)
-
+          setClaesEmpresa([...claesEmpresa, descripcion_clae.data[0]]);
         }
+      } else {
+        setType("error");
+        setHeader("No encontrado");
+        setMessage("El código ingresado no existe");
 
+        toaster.push(notificacion);
+      }
     }
 
-    e.target.value =''
-   
-
-  }
+    e.target.value = "";
+  };
 
   const borrarClae = (clae) => {
-
     //Borrado del formulario
-    let claeUpdate = formData.clae
+    let claeUpdate = formData.clae;
 
-    const index = claeUpdate.indexOf(clae)
+    const index = claeUpdate.indexOf(clae);
 
     if (index > -1) {
-      claeUpdate.splice(index, 1)
+      claeUpdate.splice(index, 1);
     }
 
-    setFormData({...formData, clae: claeUpdate})
+    setFormData({ ...formData, clae: claeUpdate });
 
     //Borrado de claes encontrados
 
-    let claesEncontradosUpdate = claesEmpresa
+    let claesEncontradosUpdate = claesEmpresa;
 
-    claesEncontradosUpdate = claesEncontradosUpdate.filter(item => clae !== item.codigo_clae )
+    claesEncontradosUpdate = claesEncontradosUpdate.filter(
+      (item) => clae !== item.codigo_clae
+    );
 
-    setClaesEmpresa(claesEncontradosUpdate)
-
-  }
+    setClaesEmpresa(claesEncontradosUpdate);
+  };
 
   const cargarEmpresa = async () => {
+    const response = await axios.post(`${API_BASE_URL}/empresas`, formData);
 
-      const response = await axios.post(`${API_BASE_URL}/empresas`, formData)
+    if (response.data.rowCount === 1) {
+      const success = (
+        <Message
+          id="finalsuccess"
+          showIcon
+          type="success"
+          style={{
+            position: "fixed",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: "100vh",
+            transform: "translateY(-50px)",
+          }}
+        >
+          <h1>La empresa se cargó correctamente</h1>
+        </Message>
+      );
 
+      toaster.push(success, { duration: 1500 });
 
-
-  }
+    }
+  };
 
   // ==================================== COMPONENTE =======================================
 
@@ -475,27 +561,53 @@ function Agregar() {
     const fetchDatos = async () => {
       try {
         //===============================FETCH DATOS=============================
-        let fetchSectores = []
-        let fetchHerramientas = []
+        let fetchSectores = [];
+        let fetchHerramientas = [];
+        let fetchAsesores = [];
 
         //Sectores
         const response_sectores = await axios.get(`${API_BASE_URL}/sectores`);
-        
-        response_sectores.data.map((sector)=>{fetchSectores.push(sector.nombre_sector)})
 
-        fetchSectores = fetchSectores.map((item) => ({ label: item, value: item }))
+        response_sectores.data.map((sector) => {
+          fetchSectores.push(sector.nombre_sector);
+        });
+
+        fetchSectores = fetchSectores.map((item) => ({
+          label: item,
+          value: item,
+        }));
 
         setSectores(fetchSectores);
 
         //Herramientas
-        const response_herramientas = await axios.get(`${API_BASE_URL}/herramientas`)
-        
-        response_herramientas.data.map((herramienta)=>{fetchHerramientas.push(herramienta.nombre_herramienta)})
+        const response_herramientas = await axios.get(
+          `${API_BASE_URL}/herramientas`
+        );
 
-        fetchHerramientas  = fetchHerramientas.map((item) => ({ label: item, value: item }))
+        response_herramientas.data.map((herramienta) => {
+          fetchHerramientas.push(herramienta.nombre_herramienta);
+        });
 
-        setHerramientas(fetchHerramientas)
+        fetchHerramientas = fetchHerramientas.map((item) => ({
+          label: item,
+          value: item,
+        }));
 
+        setHerramientas(fetchHerramientas);
+
+        //Asesores
+        const response_asesores = await axios.get(`${API_BASE_URL}/asesores`);
+
+        response_asesores.data.map((asesor) => {
+          fetchAsesores.push(asesor.nombre_asesor);
+        });
+
+        fetchAsesores = fetchAsesores.map((item) => ({
+          label: item,
+          value: item,
+        }));
+
+        setAsesores(fetchAsesores);
       } catch (error) {
         console.error(error);
       }
@@ -504,7 +616,7 @@ function Agregar() {
     fetchDatos();
   }, []);
 
-//============================================================================================
+  //============================================================================================
 
   return (
     <div>
@@ -531,7 +643,14 @@ function Agregar() {
               <Form.Group controlId="cuit">
                 <Form.ControlLabel>CUIT *</Form.ControlLabel>
                 <InputGroup>
-                  <Input maxLength={2} style={{ textAlign: "center" }} />
+                  <Input
+                    maxLength={2}
+                    style={{ textAlign: "center" }}
+                    defaultValue={formData.cuit1}
+                    onChange={(e, e2) => {
+                      setFormData({ ...formData, cuit1: e2.target.value });
+                    }}
+                  />
                   <InputGroup.Addon>-</InputGroup.Addon>
                   <Input
                     style={{ textAlign: "center", width: "200px" }}
@@ -547,7 +666,6 @@ function Agregar() {
                     onChange={(e, e2) => {
                       setFormData({ ...formData, cuit3: e2.target.value });
                     }}
-                    value={formData.cuit3}
                   />
                 </InputGroup>
               </Form.Group>
@@ -600,7 +718,7 @@ function Agregar() {
                 <Form.Control
                   rows={3}
                   name="descripcion"
-                  maxLength={250}
+                  maxLength={400}
                   accepter={Textarea}
                   defaultValue={formData.descripcion}
                   onChange={(e, e2) =>
@@ -689,10 +807,16 @@ function Agregar() {
                   searchable={true}
                   onClean={() => {
                     setParquesDisabled(true);
-                    setFormData({...formData, ciudad: "", parque_industrial: "" });
+                    setFormData({
+                      ...formData,
+                      ciudad: "",
+                      parque_industrial: "",
+                    });
                   }}
                   disabled={ciudadesDisabled}
-                  onSelect={async (value)=> {await handleCiudadSelect(value)}}
+                  onSelect={async (value) => {
+                    await handleCiudadSelect(value);
+                  }}
                 />
               </Form.Group>
 
@@ -711,8 +835,8 @@ function Agregar() {
                   searchable={false}
                   disabled={parquesDisabled}
                   onSelect={(value) => {
-                    setFormData({ ...formData, parque_industrial: value })}
-                  }
+                    setFormData({ ...formData, parque_industrial: value });
+                  }}
                 />
 
                 <Form.HelpText style={{ margin: "10px 0" }}>
@@ -800,8 +924,8 @@ function Agregar() {
                         required
                       />
                       <Form.HelpText>
-                        Breve descripción del contacto con la empresa/proyecto
-                        presentado
+                        Breve descripción de la intervención - oportunidades de
+                        mejora abordadas o ejes trabajados
                       </Form.HelpText>
                     </Form.Group>
 
@@ -858,7 +982,9 @@ function Agregar() {
                     <Form.Group controlId="ciudad">
                       <Form.ControlLabel>CIUDAD</Form.ControlLabel>
                       <SelectPicker
-                        onSearch={async (value)=>{await busquedaCiudades(value)}}
+                        onSearch={async (value) => {
+                          await busquedaCiudades(value);
+                        }}
                         id="ciudad"
                         data={ciudadesBusqueda}
                         block
@@ -872,7 +998,7 @@ function Agregar() {
                       <Form.ControlLabel>ASESORES</Form.ControlLabel>
                       <TagPicker
                         id="asesores"
-                        data={datos_asesores}
+                        data={asesores}
                         block
                         placeholder="Seleccione los asesores"
                         tagProps={{ color: "green" }}
@@ -906,7 +1032,7 @@ function Agregar() {
                   <Modal.Title>Editar antecedente</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  <Form fluid onSubmit={handleSubmitAgregarAntecedente}>
+                  <Form fluid onSubmit={handleSubmitEditarAntecedente}>
                     {/* RESUMEN */}
                     <Form.Group controlId="resumen">
                       <Form.ControlLabel>RESUMEN</Form.ControlLabel>
@@ -933,6 +1059,7 @@ function Agregar() {
                         block
                         id="programa"
                         defaultValue={antecedenteEditable.motivo}
+                        disabled
                       ></SelectPicker>
                     </Form.Group>
 
@@ -944,6 +1071,7 @@ function Agregar() {
                         data={añosSelect}
                         placeholder="Seleccione un año"
                         defaultValue={antecedenteEditable.año}
+                        disabled
                       />
                     </Form.Group>
 
@@ -976,15 +1104,17 @@ function Agregar() {
 
                     {/* CIUDAD */}
                     <Form.Group controlId="ciudad">
-                      <Form.ControlLabel>CIUDAD *</Form.ControlLabel>
+                      <Form.ControlLabel>CIUDAD</Form.ControlLabel>
                       <SelectPicker
-                        //ASYNC
+                        onSearch={async (value) => {
+                          await busquedaCiudades(value);
+                        }}
                         id="ciudad"
-                        data={herramientas}
+                        data={ciudadesBusqueda}
                         block
+                        defaultValue={antecedenteEditable.ciudad}
                         placeholder="Seleccione la ciudad"
                         tagProps={{ color: "red" }}
-                        defaultValue={antecedenteEditable.ciudad}
                       />
                     </Form.Group>
 
@@ -993,7 +1123,7 @@ function Agregar() {
                       <Form.ControlLabel>ASESORES *</Form.ControlLabel>
                       <TagPicker
                         id="asesores"
-                        data={datos_asesores}
+                        data={asesores}
                         block
                         placeholder="Seleccione los asesores"
                         tagProps={{ color: "green" }}
@@ -1075,38 +1205,65 @@ function Agregar() {
                   <Form.ControlLabel>
                     CLAE - Clasificador de actividad económica
                   </Form.ControlLabel>
-                
-                  
-                  <InputGroup>
-                      <Input id="codigo_clae" onPressEnter={obtenerClae}/>
-                  <InputGroup.Button>
-                    <SearchIcon />
-                  </InputGroup.Button>
-                </InputGroup>
 
-                  
-      
+                  <InputGroup>
+                    <Input id="codigo_clae" onPressEnter={obtenerClae} />
+                    <InputGroup.Button>
+                      <SearchIcon />
+                    </InputGroup.Button>
+                  </InputGroup>
+
                   <Form.HelpText>
                     Agregue los códigos de CLAE, los mismos se pueden encontrar
-                    en <a href="https://www.cuitonline.com/" target="_blank" rel="noreferrer">CUIT ONLINE</a>.
+                    en{" "}
+                    <a
+                      href="https://www.cuitonline.com/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      CUIT ONLINE
+                    </a>
+                    .
                   </Form.HelpText>
                 </Form.Group>
 
                 <p className="header">CLAES ENCONTRADOS</p>
-                <Form.HelpText style={{fontSize: 15, color: "black"}}>
+                <Form.HelpText style={{ fontSize: 15, color: "black" }}>
+                  {claesEmpresa.length > 0 ? (
+                    claesEmpresa.map((clae) => {
+                      return (
+                        <div
+                          key={clae.codigo_clae}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            margin: "5px 20px",
+                          }}
+                        >
+                          <p>
+                            {" "}
+                            {clae.codigo_clae} - {clae.seccion_clae} -{" "}
+                            {clae.descripcion_actividad}
+                          </p>
 
-                  {claesEmpresa.length>0 ? claesEmpresa.map(clae => {
-                      return <div key={clae.codigo_clae} style={{display: 'flex', justifyContent: 'space-between', margin: '5px 20px'}}><p> {clae.codigo_clae}  -  {clae.seccion_clae}  - {clae.descripcion_actividad}</p>
-                      
-                      <IconButton style={{float: 'right'}} appearance="primary" color="red" icon={<CloseIcon />} circle size="xs" onClick={()=>{ borrarClae(clae.codigo_clae)}} />
-                      </div>
-                  
-                  }): <p>-</p>}    
-
+                          <IconButton
+                            style={{ float: "right" }}
+                            appearance="primary"
+                            color="red"
+                            icon={<CloseIcon />}
+                            circle
+                            size="xs"
+                            onClick={() => {
+                              borrarClae(clae.codigo_clae);
+                            }}
+                          />
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p>-</p>
+                  )}
                 </Form.HelpText>
-                  
-
-
               </Form>
             </>
           ) : null}
@@ -1143,13 +1300,21 @@ function Agregar() {
                 </Button>
               </Form>
 
-
-            {/* Cards de contactos */}
-              <PanelGroup style={{margin: '10px 0'}} accordion defaultActiveKey={1} bordered>
-              
-              {/* Para cada contacto se crea un panel con los datos y la opción de borrar */}
-              {formData.contactos.map((contacto, index) => (
-                <Panel header={contacto.nombre} key={contacto.nombre} eventKey={index} id={`panel${index}`}>
+              {/* Cards de contactos */}
+              <PanelGroup
+                style={{ margin: "10px 0" }}
+                accordion
+                defaultActiveKey={1}
+                bordered
+              >
+                {/* Para cada contacto se crea un panel con los datos y la opción de borrar */}
+                {formData.contactos.map((contacto, index) => (
+                  <Panel
+                    header={contacto.nombre}
+                    key={contacto.nombre}
+                    eventKey={index}
+                    id={`panel${index}`}
+                  >
                     <p className="header">Teléfono</p>
                     <p>{contacto.telefono}</p>
                     <p className="header">Mail</p>
@@ -1157,41 +1322,60 @@ function Agregar() {
                     <p className="header">Puesto</p>
                     <p>{contacto.puesto}</p>
                     <br />
-                    <Button appearance="primary" color="red" onClick={() => handleDeleteContacto(index)}>Eliminar Contacto</Button>
-                </Panel>
-              ))}
-
+                    <Button
+                      appearance="primary"
+                      color="red"
+                      onClick={() => handleDeleteContacto(index)}
+                    >
+                      Eliminar Contacto
+                    </Button>
+                  </Panel>
+                ))}
               </PanelGroup>
-            
-              <Button appearance="primary" color="green" onClick={()=>{cargarEmpresa()}} block disabled={statusStep1 === 'error' || statusStep2  === 'error' || statusStep4 === 'error'}>
-                  Cargar empresa
+
+              <Button
+                appearance="primary"
+                color="green"
+                onClick={() => {
+                  cargarEmpresa();
+
+                  setTimeout(() => {
+                  navigate(`/${formData.cuit1}${formData.cuit2}${formData.cuit3}`); 
+                  }, 2000)
+                  
+                  
+                }}
+                block
+                disabled={
+                  statusStep1 === "error" ||
+                  statusStep2 === "error" ||
+                  statusStep4 === "error"
+                }
+              >
+                Cargar empresa
               </Button>
-              
-              {statusStep1 === 'error'?
-              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
-                Hay datos obligatorios incompletos en el paso 1
-              </Form.HelpText>
-              : null}
 
-              {statusStep2 === 'error'?
-              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
-                Hay datos obligatorios incompletos en el paso 2
-              </Form.HelpText>
-              : null}
+              {statusStep1 === "error" ? (
+                <Form.HelpText style={{ color: "red", textAlign: "center" }}>
+                  Hay datos obligatorios incompletos en el paso 1
+                </Form.HelpText>
+              ) : null}
 
-              {statusStep4 === 'error'?
-              <Form.HelpText style={{color: 'red', textAlign: 'center'}}>
-                Hay datos obligatorios incompletos en el paso 4
-              </Form.HelpText>
-              : null}
+              {statusStep2 === "error" ? (
+                <Form.HelpText style={{ color: "red", textAlign: "center" }}>
+                  Hay datos obligatorios incompletos en el paso 2
+                </Form.HelpText>
+              ) : null}
 
-
+              {statusStep4 === "error" ? (
+                <Form.HelpText style={{ color: "red", textAlign: "center" }}>
+                  Hay datos obligatorios incompletos en el paso 4
+                </Form.HelpText>
+              ) : null}
             </>
           ) : null}
         </Panel>
         <br />
-
-            
 
         <ButtonGroup style={{ margin: "10px 0 80px 0" }}>
           <Button
