@@ -55,24 +55,31 @@ const provincias_select = [
 
 const programasSelect = [
   "Kaizen Tango",
-  "PRODEPRO AT",
-  "PRODEPRO ANR",
+  "PRODEPRO",
   "PAC",
   "PRODUCTIVIDAD 4.0",
   "AT Sin Financiamiento",
+  "Sustenta YPF",
   "Programa PAE",
   "Otro",
 ].map((item) => ({ label: item, value: item }));
 
-const estados = [
-  "Potencial",
-  "En Proceso",
-  "Presentó",
-  "Aprobado",
-  "En curso",
-  "Finalizado",
-  "No avanzó",
-].map((item) => ({ label: item, value: item }));
+const tipo_at = ["Diagnóstico", "Implementación"].map((item) => ({
+  label: item,
+  value: item,
+}));
+
+const tipo_diagnostico = [
+  "Productivo Simple (DPS)",
+  "Organismo Público",
+  "Madurez Digital",
+  "Industria 4.0",
+  "Auditoría",
+  "Otros",
+].map((item) => ({
+  label: item,
+  value: item,
+}));
 
 const añosSelect = ["2023", "2022", "2021", "2020", "2019"];
 
@@ -134,6 +141,7 @@ function Agregar() {
   const [claesEmpresa, setClaesEmpresa] = useState([]);
 
   const [antecedenteEditable, setAntecedenteEditable] = useState({});
+  const [tipoAntecedente, setTipoAntecedente] = useState(null);
 
   // ============================ NOTIFICACIÓN =======================
 
@@ -273,26 +281,44 @@ function Agregar() {
   };
 
   const handleSubmitAgregarAntecedente = (e, e2) => {
+    const tipo_at = e2.target.tipo_at.defaultValue;
+
     //Generación de objetos
-    const herramientas = e2.target.herramientas.defaultValue.split(",");
     const asesores = e2.target.asesores.defaultValue.split(",");
 
-    const nuevo_antecedente = {
-      resumen: e2.target.resumen.value,
-      motivo: e2.target.programa.defaultValue,
-      año: e2.target.año.defaultValue,
-      estado: e2.target.estado.defaultValue,
-      herramientas: herramientas,
-      ciudad: e2.target.ciudad.defaultValue,
-      asesores: asesores,
-    };
+    let nuevo_antecedente;
+
+    if (tipo_at === "Diagnóstico") {
+      nuevo_antecedente = {
+        resumen: e2.target.resumen.value,
+        motivo: e2.target.programa.defaultValue,
+        año: e2.target.año.defaultValue,
+        herramientas: [],
+        tipo_at: tipo_at,
+        tipo_diagnostico: e2.target.tipo_diagnostico.defaultValue,
+        ciudad: e2.target.ciudad.defaultValue,
+        asesores: asesores,
+      };
+    } else {
+      const herramientas = e2.target.herramientas.defaultValue.split(",");
+
+      nuevo_antecedente = {
+        resumen: e2.target.resumen.value,
+        motivo: e2.target.programa.defaultValue,
+        año: e2.target.año.defaultValue,
+        herramientas: herramientas,
+        tipo_at: tipo_at,
+        tipo_diagnostico: null,
+        ciudad: e2.target.ciudad.defaultValue,
+        asesores: asesores,
+      };
+    }
 
     //Validación de campos obligatorios
     if (
       nuevo_antecedente.resumen &&
       nuevo_antecedente.motivo &&
-      nuevo_antecedente.año &&
-      nuevo_antecedente.estado
+      nuevo_antecedente.año
     ) {
       setFormData({
         ...formData,
@@ -327,34 +353,53 @@ function Agregar() {
       obj.resumen !== antecedenteEditable.resumen ||
       obj.motivo !== antecedenteEditable.motivo ||
       obj.año !== antecedenteEditable.año ||
-      obj.estado !== antecedenteEditable.estado ||
       obj.ciudad !== antecedenteEditable.ciudad ||
+      obj.tipo_diagnostico !== antecedenteEditable.tipo_diagnostico ||
       !sonArraysIguales(obj.herramientas, antecedenteEditable.herramientas) ||
       !sonArraysIguales(obj.asesores, antecedenteEditable.asesores)
     );
   };
 
   const handleSubmitEditarAntecedente = (e, e2) => {
+    const tipo_at = e2.target.tipo_at.defaultValue;
+
+    let nuevo_antecedente;
+
     //Generación de objetos
-    const herramientas = e2.target.herramientas.defaultValue.split(",");
     const asesores = e2.target.asesores.defaultValue.split(",");
 
-    const nuevo_antecedente = {
-      resumen: e2.target.resumen.value,
-      motivo: e2.target.programa.defaultValue,
-      año: e2.target.año.defaultValue,
-      estado: e2.target.estado.defaultValue,
-      herramientas: herramientas,
-      ciudad: e2.target.ciudad.defaultValue,
-      asesores: asesores,
-    };
+    if (tipo_at === "Diagnóstico") {
+
+      nuevo_antecedente = {
+        resumen: e2.target.resumen.value,
+        motivo: e2.target.programa.defaultValue,
+        año: e2.target.año.defaultValue,
+        tipo_at: e2.target.tipo_at.defaultValue,
+        tipo_diagnostico: e2.target.tipo_diagnostico.defaultValue,
+        herramientas: [],
+        ciudad: e2.target.ciudad.defaultValue,
+        asesores: asesores,
+      };
+    } else {
+      const herramientas = e2.target.herramientas.defaultValue.split(",");
+
+      nuevo_antecedente = {
+        resumen: e2.target.resumen.value,
+        motivo: e2.target.programa.defaultValue,
+        año: e2.target.año.defaultValue,
+        tipo_at: e2.target.tipo_at.defaultValue,
+        tipo_diagnostico: null,
+        herramientas: herramientas,
+        ciudad: e2.target.ciudad.defaultValue,
+        asesores: asesores,
+      };
+    }
 
     //Validación de campos obligatorios
     if (
       nuevo_antecedente.resumen &&
       nuevo_antecedente.motivo &&
-      nuevo_antecedente.año &&
-      nuevo_antecedente.estado
+      nuevo_antecedente.año
     ) {
       if (esDiferente(nuevo_antecedente)) {
         let antecedenteUpdate = formData.antecedentes;
@@ -388,11 +433,7 @@ function Agregar() {
     const actual = formData.antecedentes;
 
     const antecedentesUpdate = actual.filter((item) => {
-      return (
-        item.motivo !== rowData.motivo ||
-        item.año !== rowData.año ||
-        item.estado !== rowData.estado
-      );
+      return item.motivo !== rowData.motivo || item.año !== rowData.año;
     });
 
     setFormData({ ...formData, antecedentes: antecedentesUpdate });
@@ -403,7 +444,8 @@ function Agregar() {
       resumen: rowData.resumen,
       motivo: rowData.motivo,
       año: rowData.año,
-      estado: rowData.estado,
+      tipo_at: rowData.tipo_at,
+      tipo_diagnostico: rowData.tipo_diagnostico,
       herramientas: rowData.herramientas,
       ciudad: rowData.ciudad,
       asesores: rowData.asesores,
@@ -551,7 +593,6 @@ function Agregar() {
       );
 
       toaster.push(success, { duration: 1500 });
-
     }
   };
 
@@ -862,8 +903,8 @@ function Agregar() {
                 </Column>
 
                 <Column flexGrow={1} align="center">
-                  <HeaderCell>Estado</HeaderCell>
-                  <Cell dataKey="estado" />
+                  <HeaderCell>Tipo</HeaderCell>
+                  <Cell dataKey="tipo_at" />
                 </Column>
 
                 <Column width={80} align="center">
@@ -929,6 +970,21 @@ function Agregar() {
                       </Form.HelpText>
                     </Form.Group>
 
+                    {/* TIPO AT */}
+                    <Form.Group controlId="tipo">
+                      <Form.ControlLabel>TIPO AT *</Form.ControlLabel>
+                      <SelectPicker
+                        required
+                        data={tipo_at}
+                        searchable={false}
+                        placeholder="Seleccione el tipo de asistencia"
+                        block
+                        id="tipo_at"
+                        onSelect={(value) => setTipoAntecedente(value)}
+                        onClean={() => setTipoAntecedente(null)}
+                      />
+                    </Form.Group>
+
                     {/* PROGRAMA/MOTIVO */}
                     <Form.Group controlId="programa">
                       <Form.ControlLabel>PROGRAMA/MOTIVO *</Form.ControlLabel>
@@ -952,31 +1008,34 @@ function Agregar() {
                       />
                     </Form.Group>
 
-                    {/* ESTADO */}
-                    <Form.Group controlId="estado">
-                      <Form.ControlLabel>ESTADO *</Form.ControlLabel>
-                      <SelectPicker
-                        required
-                        data={estados}
-                        searchable={false}
-                        placeholder="Seleccione el estado"
-                        block
-                        id="estado"
-                      />
-                    </Form.Group>
-
                     {/* HERRAMIENTAS */}
-                    <Form.Group controlId="herramientas">
-                      <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
-                      <TagPicker
-                        id="herramientas"
-                        data={herramientas}
-                        block
-                        placement="auto"
-                        placeholder="Seleccione las herramientas"
-                        tagProps={{ color: "red" }}
-                      />
-                    </Form.Group>
+                    {tipoAntecedente && tipoAntecedente === "Implementación" ? (
+                      <Form.Group controlId="herramientas">
+                        <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
+                        <TagPicker
+                          id="herramientas"
+                          data={herramientas}
+                          block
+                          placement="auto"
+                          placeholder="Seleccione las herramientas"
+                          tagProps={{ color: "red" }}
+                        />
+                      </Form.Group>
+                    ) : null}
+
+                    {tipoAntecedente && tipoAntecedente === "Diagnóstico" ? (
+                      /* TIPO DIAGNÓSTICO */
+                      <Form.Group controlId="tipo_diagnostico">
+                        <Form.ControlLabel>TIPO DIAGNÓSTICO</Form.ControlLabel>
+                        <SelectPicker
+                          id="tipo_diagnostico"
+                          block
+                          data={tipo_diagnostico}
+                          searchable={false}
+                          placeholder="Seleccione el tipo de diagnóstico"
+                        />
+                      </Form.Group>
+                    ) : null}
 
                     {/* CIUDAD */}
                     <Form.Group controlId="ciudad">
@@ -989,7 +1048,6 @@ function Agregar() {
                         data={ciudadesBusqueda}
                         block
                         placeholder="Seleccione la ciudad"
-                        tagProps={{ color: "red" }}
                       />
                     </Form.Group>
 
@@ -1048,6 +1106,21 @@ function Agregar() {
                       </Form.HelpText>
                     </Form.Group>
 
+                    {/* TIPO AT */}
+                    <Form.Group controlId="tipo_at">
+                      <Form.ControlLabel>TIPO AT *</Form.ControlLabel>
+                      <SelectPicker
+                        required
+                        data={tipo_at}
+                        disabled
+                        searchable={false}
+                        placeholder="Seleccione el tipo de AT"
+                        block
+                        id="tipo_at"
+                        defaultValue={antecedenteEditable.tipo_at}
+                      />
+                    </Form.Group>
+
                     {/* PROGRAMA/MOTIVO */}
                     <Form.Group controlId="programa">
                       <Form.ControlLabel>PROGRAMA/MOTIVO *</Form.ControlLabel>
@@ -1075,32 +1148,36 @@ function Agregar() {
                       />
                     </Form.Group>
 
-                    {/* ESTADO */}
-                    <Form.Group controlId="estado">
-                      <Form.ControlLabel>ESTADO *</Form.ControlLabel>
-                      <SelectPicker
-                        required
-                        data={estados}
-                        searchable={false}
-                        placeholder="Seleccione el estado"
-                        block
-                        id="estado"
-                        defaultValue={antecedenteEditable.estado}
-                      />
-                    </Form.Group>
-
                     {/* HERRAMIENTAS */}
-                    <Form.Group controlId="herramientas">
-                      <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
-                      <TagPicker
-                        id="herramientas"
-                        data={herramientas}
-                        block
-                        placeholder="Seleccione las herramientas"
-                        tagProps={{ color: "red" }}
-                        defaultValue={antecedenteEditable.herramientas}
-                      />
-                    </Form.Group>
+                    {antecedenteEditable.tipo_at === "Implementación" ? (
+                      <Form.Group controlId="herramientas">
+                        <Form.ControlLabel>HERRAMIENTAS</Form.ControlLabel>
+                        <TagPicker
+                          id="herramientas"
+                          data={herramientas}
+                          block
+                          placeholder="Seleccione las herramientas"
+                          tagProps={{ color: "red" }}
+                          defaultValue={antecedenteEditable.herramientas}
+                        />
+                      </Form.Group>
+                    ) : null}
+
+                    {/* TIPO DIAGNÓSTICO */}
+
+                    {antecedenteEditable.tipo_at === "Diagnóstico" ? (
+                      <Form.Group controlId="tipo_diagnostico">
+                        <Form.ControlLabel>TIPO DIAGNÓSTICO</Form.ControlLabel>
+                        <SelectPicker
+                          id="tipo_diagnostico"
+                          block
+                          data={tipo_diagnostico}
+                          searchable={false}
+                          placeholder="Seleccione el tipo de diagnóstico"
+                          defaultValue={antecedenteEditable.tipo_diagnostico}
+                        />
+                      </Form.Group>
+                    ) : null}
 
                     {/* CIUDAD */}
                     <Form.Group controlId="ciudad">
@@ -1340,10 +1417,10 @@ function Agregar() {
                   cargarEmpresa();
 
                   setTimeout(() => {
-                  navigate(`/${formData.cuit1}${formData.cuit2}${formData.cuit3}`); 
-                  }, 2000)
-                  
-                  
+                    navigate(
+                      `/${formData.cuit1}${formData.cuit2}${formData.cuit3}`
+                    );
+                  }, 2000);
                 }}
                 block
                 disabled={
