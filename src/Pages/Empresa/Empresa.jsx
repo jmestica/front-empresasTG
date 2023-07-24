@@ -12,12 +12,12 @@ import {
   SelectPicker,
   Form,
   Input,
-  InputGroup,
   Panel,
   PanelGroup,
 } from "rsuite";
 const { Column, HeaderCell, Cell } = Table;
-import { SiMicrosoftoutlook, SiWhatsapp } from "react-icons/si";
+import { SiMicrosoftoutlook } from "react-icons/si";
+import { BsLink45Deg } from "react-icons/bs";
 import { FaPeopleArrows } from "react-icons/fa";
 import { useState, useEffect, forwardRef } from "react";
 
@@ -32,15 +32,6 @@ const programasSelect = [
   "PRODEPRO ANR",
   "PAC",
   "PRODUCTIVIDAD 4.0",
-].map((item) => ({ label: item, value: item }));
-
-const estados = [
-  "Potencial",
-  "En Proceso",
-  "Presentó",
-  "Aprobado",
-  "En curso",
-  "Finalizado",
 ].map((item) => ({ label: item, value: item }));
 
 const añosSelect = [
@@ -202,6 +193,23 @@ function Empresa() {
               </div>
 
               <div className="inf">
+                <p className="header">DOMICILIO</p>
+                <p className="inf-content"> {datosEmpresa.domicilio}</p>
+              </div>
+
+              <div className="inf">
+                <p className="header">LOCALIDAD</p>
+                <p className="inf-content"> {datosEmpresa.ciudad}</p>
+              </div>
+
+              <div className="inf">
+                <p className="header">PROVINCIA</p>
+                <p className="inf-content"> {datosEmpresa.provincia}</p>
+              </div>
+            </div>
+
+            <div className="inf-container">
+              <div className="inf">
                 <p className="header" style={{ textAlign: "center" }}>
                   SECTOR DE PERTENENCIA
                 </p>
@@ -225,31 +233,46 @@ function Empresa() {
 
             <div className="inf-container">
               <div className="inf">
-                <p className="header">PÁGINA WEB</p>
-                <p className="inf-content">
-                  <a
+                <p className="header" style={{ textAlign: "center" }}>
+                  LINKS
+                </p>
+
+                <div className="links-container" style={{ display: "flex" }}>
+                  <IconButton
+                    className="btn-icon"
+                    icon={<FaPeopleArrows className="icon-button" />}
+                    color="blue"
+                    appearance="primary"
+                    href={datosEmpresa.link_crm}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Historial CRM
+                  </IconButton>
+                  <IconButton
+                    className="btn-icon"
+                    icon={<BsLink45Deg className="icon-button" />}
+                    color="blue"
+                    appearance="primary"
                     href={datosEmpresa.link_web}
                     target="_blank"
-                    rel="noreferrer "
+                    rel="noreferrer"
                   >
-                    {datosEmpresa.link_web}
-                  </a>
-                </p>
-              </div>
+                    Página Web
+                  </IconButton>
 
-              <div className="inf">
-                <p className="header">DOMICILIO</p>
-                <p className="inf-content"> {datosEmpresa.domicilio}</p>
-              </div>
-
-              <div className="inf">
-                <p className="header">LOCALIDAD</p>
-                <p className="inf-content"> {datosEmpresa.ciudad}</p>
-              </div>
-
-              <div className="inf">
-                <p className="header">PROVINCIA</p>
-                <p className="inf-content"> {datosEmpresa.provincia}</p>
+                  <IconButton
+                    className="btn-icon"
+                    icon={<SiMicrosoftoutlook className="icon-button" />}
+                    color="blue"
+                    appearance="primary"
+                    href={datosEmpresa.link_crm}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    
+                  </IconButton>
+                </div>
               </div>
             </div>
 
@@ -265,55 +288,59 @@ function Empresa() {
                 </p>
               </div>
             </div>
-            <div className="inf-container">
+            <div className="inf-container" style={{width: '100%'}}>
               <div className="inf">
                 <p className="header" style={{ textAlign: "center" }}>
                   CLAES
                 </p>
-                {claes.map((clae) => (
-                  <p>
-                    {" "}
-                    {clae.codigo_clae} - {clae.seccion_clae} -{" "}
-                    {clae.descripcion_actividad}
-                  </p>
-                ))}
               </div>
             </div>
 
-            {/* ================================================ LINKS INTEGRACIONES ================================================= */}
+                 
+            <Table data={claes} wordWrap>
+                    <Column align="center" flexGrow={1}>
+                      <HeaderCell style={{ color: "black" }}>
+                        Código de Actividad
+                      </HeaderCell>
+                      <Cell dataKey="codigo_clae" />
+                    </Column>
+                    <Column align="center" flexGrow={1}>
+                      <HeaderCell style={{ color: "black" }}>
+                        Sección
+                      </HeaderCell>
+                      <Cell dataKey="seccion_clae" />
+                    </Column>
+                    <Column align="center" flexGrow={1}>
+                      <HeaderCell style={{ color: "black" }}>
+                        Descripción de Actividad
+                      </HeaderCell>
+                      <Cell dataKey="descripcion_actividad" style={{fontSize: '15px'}} />
+                    </Column>
+                  </Table>
+           
 
-            <div className="integrations-container">
-              <IconButton
-                className="btn-icon"
-                icon={<FaPeopleArrows className="icon-button" />}
-                color="red"
-                appearance="primary"
-                href={datosEmpresa.link_crm}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Historial CRM
-              </IconButton>
-            </div>
           </div>
 
           {/* ================================================ CARDS DE CONTACTO ================================================= */}
 
           <div className="contact-info">
             <p className="header-2">INFORMACIÓN DE CONTACTO</p>
-            <PanelGroup accordion bordered style={{margin: '50px 20px'}}>
+            <PanelGroup accordion bordered style={{ margin: "50px 20px" }}>
               {contactos.map((contacto, index) => {
                 return (
-                  <Panel header={`${contacto.nombre_contacto}`} eventKey={index} id={`panel${1}`}>
-                      <p className="header">PUESTO</p>
-                      <p>{contacto.puesto}</p>
-                      <br />
-                      <p className="header">EMAIL</p>
-                      <p>{contacto.email}</p>
-                      <br />
-                      <p className="header">TELÉFONO</p>
-                      <p>{contacto.telefono}</p>
-
+                  <Panel
+                    header={`${contacto.nombre_contacto}`}
+                    eventKey={index}
+                    id={`panel${1}`}
+                  >
+                    <p className="header">PUESTO</p>
+                    <p>{contacto.puesto}</p>
+                    <br />
+                    <p className="header">EMAIL</p>
+                    <p>{contacto.email}</p>
+                    <br />
+                    <p className="header">TELÉFONO</p>
+                    <p>{contacto.telefono}</p>
                   </Panel>
                 );
               })}
